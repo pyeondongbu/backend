@@ -14,9 +14,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT m FROM Member m WHERE m.refreshToken = :token")
-    Optional<Member> findByRefreshToken(@Param("token") String token);
-
-    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.posts WHERE m.id = :id")
-    Optional<Member> findByIdWithPosts(@Param("id") Long id);
+    // findByIdWithPosts 메서드 잠시 주석 처리
+    // @Query("SELECT m FROM Member m LEFT JOIN FETCH m.posts WHERE m.id = :id")
+    // Optional<Member> findByIdWithPosts(Long id);
 }

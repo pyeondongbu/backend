@@ -51,4 +51,6 @@ public class Member extends BaseTimeEntity {
     public void promoteToAdmin() {
         this.authority = Authority.ROLE_ADMIN;
     }
+
+
 }
