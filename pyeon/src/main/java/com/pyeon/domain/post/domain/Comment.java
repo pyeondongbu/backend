@@ -1,5 +1,6 @@
 package com.pyeon.domain.post.domain;
 
+import com.pyeon.domain.member.domain.Member;
 import com.pyeon.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -19,8 +20,9 @@ public class Comment extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(nullable = false, length = 50)
-    private String author;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
@@ -29,15 +31,19 @@ public class Comment extends BaseTimeEntity {
     @Builder
     public Comment(
             String content,
-            String author,
+            Member member,
             Post post
     ) {
         this.content = content;
-        this.author = author;
+        this.member = member;
         this.post = post;
     }
 
     public void update(String content) {
         this.content = content;
+    }
+
+    public boolean isAuthor(String email) {
+        return member.getEmail().equals(email);
     }
 }

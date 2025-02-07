@@ -3,29 +3,47 @@ package com.pyeon.domain.auth.domain;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @Getter
-public class UserPrincipal implements UserDetails {
+public class UserPrincipal implements OAuth2User, UserDetails {
     private final Long id;
     private final String email;
+    private final String nickname;
+    private final String profileImageUrl;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, String email, Collection<? extends GrantedAuthority> authorities) {
+    public UserPrincipal(
+            Long id, 
+            String email, 
+            String nickname,
+            String profileImageUrl,
+            Collection<? extends GrantedAuthority> authorities
+    ) {
         this.id = id;
         this.email = email;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
         this.authorities = authorities;
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    public Map<String, Object> getAttributes() {
+        return Collections.emptyMap();  // OAuth2 attributes는 더 이상 저장할 필요 없음
+    }
+
+    @Override
+    public String getName() {
+        return String.valueOf(id);
     }
 
     @Override
     public String getPassword() {
-        return null; // OAuth2 로그인이므로 패스워드 불필요
+        return null;  // OAuth2 로그인이므로 패스워드 불필요
     }
 
     @Override

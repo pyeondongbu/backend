@@ -25,6 +25,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new UserPrincipal(
                 member.getId(),
                 member.getEmail(),
+                member.getNickname(),
+                member.getProfileImageUrl(),
                 Collections.singleton(member.getAuthority())
         );
     }

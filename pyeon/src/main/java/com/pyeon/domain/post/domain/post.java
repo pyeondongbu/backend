@@ -7,10 +7,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
-@@Entity
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "is_active = true")
+@SQLDelete(sql = "UPDATE post SET is_active = false WHERE id = ?")
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +32,9 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private long likeCount;
 
+    @Column(nullable = false)
+    private boolean isActive;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -39,6 +46,7 @@ public class Post extends BaseTimeEntity {
         this.member = member;
         this.viewCount = 0;
         this.likeCount = 0;
+        this.isActive = true;
     }
 
     public void incrementViewCount() {
@@ -56,5 +64,9 @@ public class Post extends BaseTimeEntity {
 
     public boolean isAuthor(String email) {
         return member.getEmail().equals(email);
+    }
+
+    public void delete() {
+        this.isActive = false;
     }
 }

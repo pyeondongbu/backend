@@ -14,22 +14,30 @@ public class PostResponse {
     private Long id;
     private String title;
     private String content;
-    private String authorEmail;
-    private String authorName;
+    private String memberEmail;
+    private String memberNickname;
     private long viewCount;
     private long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private PostResponse(Long id, String title, String content, String authorEmail, 
-                        String authorName, long viewCount, long likeCount, 
-                        LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    private PostResponse(
+            Long id,
+            String title,
+            String content,
+            String memberEmail,
+            String memberNickname,
+            long viewCount,
+            long likeCount,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt
+    ) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.authorEmail = authorEmail;
-        this.authorName = authorName;
+        this.memberEmail = memberEmail;
+        this.memberNickname = memberNickname;
         this.viewCount = viewCount;
         this.likeCount = likeCount;
         this.createdAt = createdAt;
@@ -41,8 +49,8 @@ public class PostResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .authorEmail(post.getMember().getEmail())
-                .authorName(post.getMember().getNickname())
+                .memberEmail(post.getMember().getEmail())
+                .memberNickname(post.getMember().getNickname())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .createdAt(post.getCreatedAt())

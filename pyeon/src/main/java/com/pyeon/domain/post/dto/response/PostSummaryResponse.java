@@ -13,19 +13,24 @@ import java.time.LocalDateTime;
 public class PostSummaryResponse {
     private Long id;
     private String title;
-    private String authorName;
+    private String memberNickname;
     private long viewCount;
     private long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private PostSummaryResponse(Long id, String title, String authorName, 
-                              long viewCount, long likeCount, 
-                              LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    private PostSummaryResponse(
+            Long id, String title,
+            String memberNickname,
+            long viewCount,
+            long likeCount,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt
+    ) {
         this.id = id;
         this.title = title;
-        this.authorName = authorName;
+        this.memberNickname = memberNickname;
         this.viewCount = viewCount;
         this.likeCount = likeCount;
         this.createdAt = createdAt;
@@ -36,7 +41,7 @@ public class PostSummaryResponse {
         return PostSummaryResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
-                .authorName(post.getMember().getNickname())
+                .memberNickname(post.getMember().getNickname())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .createdAt(post.getCreatedAt())

@@ -1,7 +1,14 @@
 package com.pyeon.domain.post.service;
 
 import com.pyeon.domain.member.dao.MemberRepository;
+import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.post.dao.PostRepository;
+import com.pyeon.domain.post.domain.Post;
+import com.pyeon.domain.post.dto.request.PostCreateRequest;
+import com.pyeon.domain.post.dto.request.PostUpdateRequest;
+import com.pyeon.domain.post.dto.response.PostResponse;
+import com.pyeon.global.exception.CustomException;
+import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +39,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostResponse getPost(Long id) {
         Post post = findPostById(id);
         post.incrementViewCount();
@@ -64,12 +72,12 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void likePost(Long postId, String email) {
         String key = LIKE_KEY_PREFIX + postId;
-        Boolean isFirstLike = redisTemplate.opsForSet().add(key, email);
+        Long addResult = redisTemplate.opsForSet().add(key, email);
         
-        if (Boolean.TRUE.equals(isFirstLike)) {
+        if (addResult == 1) {  // 새로운 좋아요인 경우
             Post post = findPostById(postId);
             post.like();
-        } else {
+        } else {  // 이미 좋아요를 누른 경우
             throw new CustomException(ErrorCode.ALREADY_LIKED_POST);
         }
     }

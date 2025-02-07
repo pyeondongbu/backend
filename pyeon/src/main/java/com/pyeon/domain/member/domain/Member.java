@@ -22,30 +22,24 @@ public class Member extends BaseTimeEntity {
 
     private String nickname;
 
-    private String profileImage;
+    @Column(length = 2000)
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Authority authority;
 
-    @Column(length = 2000)
-    private String refreshToken;
-
     @Builder
-    public Member(String email, String nickname, String profileImage) {
+    public Member(String email, String nickname, String profileImageUrl) {
         this.email = email;
         this.nickname = nickname;
-        this.profileImage = profileImage;
+        this.profileImageUrl = profileImageUrl;
         this.authority = Authority.ROLE_USER;  // 기본 권한은 USER
     }
 
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void updateProfile(String nickname, String profileImage) {
+    public void updateProfile(String nickname, String profileImageUrl) {
         this.nickname = nickname;
-        this.profileImage = profileImage;
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void promoteToAdmin() {

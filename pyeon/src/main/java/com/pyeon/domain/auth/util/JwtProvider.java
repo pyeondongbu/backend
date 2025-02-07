@@ -9,15 +9,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.security.SecurityException;
-
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -29,68 +26,44 @@ import java.util.stream.Collectors;
 public class JwtProvider {
 
     private final String secretKey;
-    private final long accessTokenValidityInMilliseconds;
-    private final long refreshTokenValidityInMilliseconds;
+    private final long tokenValidityInMilliseconds;
     private final CustomUserDetailsService userDetailsService;
 
     /**
      * JWT Provider 생성자
      * 
      * @param secretKey JWT 서명에 사용할 비밀키
-     * @param accessTokenValidityInMilliseconds Access Token 유효 시간(밀리초)
-     * @param refreshTokenValidityInMilliseconds Refresh Token 유효 시간(밀리초)
+     * @param tokenValidityInMilliseconds Access Token 유효 시간(밀리초)
      * @param userDetailsService 사용자 정보 조회 서비스
      */
     public JwtProvider(
             @Value("${jwt.secret-key}") String secretKey,
-            @Value("${jwt.access-token-validity}") long accessTokenValidityInMilliseconds,
-            @Value("${jwt.refresh-token-validity}") long refreshTokenValidityInMilliseconds,
+            @Value("${jwt.access-token-validity}") long tokenValidityInMilliseconds,
             CustomUserDetailsService userDetailsService
     ) {
         this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        this.accessTokenValidityInMilliseconds = accessTokenValidityInMilliseconds;
-        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInMilliseconds;
+        this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
         this.userDetailsService = userDetailsService;
     }
 
     /**
      * Access Token 생성
      * 
-     * @param authentication 인증 정보
+     * @param userPrincipal 인증 정보
      * @return 생성된 Access Token
      */
-    public String createAccessToken(Authentication authentication) {
-        return createToken(authentication, accessTokenValidityInMilliseconds);
-    }
-
-    /**
-     * Refresh Token 생성
-     * 
-     * @param authentication 인증 정보
-     * @return 생성된 Refresh Token
-     */
-    public String createRefreshToken(Authentication authentication) {
-        return createToken(authentication, refreshTokenValidityInMilliseconds);
-    }
-
-    /**
-     * JWT 토큰 생성 로직
-     * 사용자 ID, 권한 정보를 포함한 토큰 생성
-     * 
-     * @param authentication 인증 정보
-     * @param validityInMilliseconds 토큰 유효 시간
-     * @return 생성된 JWT 토큰
-     */
-    private String createToken(Authentication authentication, long validityInMilliseconds) {
-        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
-        Claims claims = Jwts.claims().setSubject(principal.getUsername());
-        claims.put("id", principal.getId());
-        claims.put("authorities", principal.getAuthorities().stream()
+    public String createAccessToken(UserPrincipal userPrincipal) {
+        Claims claims = Jwts.claims();
+        claims.setSubject(userPrincipal.getEmail());
+        claims.put("id", userPrincipal.getId());
+        claims.put("nickname", userPrincipal.getNickname());
+        claims.put("profileImageUrl", userPrincipal.getProfileImageUrl());
+        claims.put("authorities", userPrincipal.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -109,13 +82,23 @@ public class JwtProvider {
      */
     public Authentication getAuthentication(String token) {
         Claims claims = parseClaims(token);
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(
-                claims.get("authorities").toString().split(","))
-                .map(SimpleGrantedAuthority::new)
+        String email = claims.getSubject();
+        Long id = claims.get("id", Long.class);
+        String nickname = claims.get("nickname", String.class);
+        String profileImageUrl = claims.get("profileImageUrl", String.class);
+        Collection<? extends GrantedAuthority> authorities = ((List<?>) claims.get("authorities")).stream()
+                .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .collect(Collectors.toList());
 
-        UserDetails principal = userDetailsService.loadUserByUsername(claims.getSubject());
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        UserPrincipal userPrincipal = new UserPrincipal(
+                id, 
+                email, 
+                nickname,
+                profileImageUrl,
+                authorities
+        );
+
+        return new UsernamePasswordAuthenticationToken(userPrincipal, "", authorities);
     }
 
     /**
@@ -127,24 +110,18 @@ public class JwtProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token);
-            return true;
+            Claims claims = parseClaims(token);
+            return !claims.getExpiration().before(new Date());
         } catch (SecurityException | MalformedJwtException e) {
             log.error("잘못된 JWT 서명입니다: {}", e.getMessage());
-            return false;
         } catch (ExpiredJwtException e) {
             log.error("만료된 JWT 토큰입니다: {}", e.getMessage());
-            return false;
         } catch (UnsupportedJwtException e) {
             log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
-            return false;
         } catch (IllegalArgumentException e) {
             log.error("JWT 토큰이 잘못되었습니다: {}", e.getMessage());
-            return false;
         }
+        return false;
     }
 
     /**

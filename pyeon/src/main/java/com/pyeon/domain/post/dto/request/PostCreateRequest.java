@@ -16,12 +16,18 @@ public class PostCreateRequest {
     private String content;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private PostCreateRequest(String title, String content) {
+    private PostCreateRequest(
+            String title,
+            String content
+    ) {
         this.title = title;
         this.content = content;
     }
 
-    public static PostCreateRequest of(String title, String content) {
+    public static PostCreateRequest of(
+            String title,
+            String content
+    ) {
         return PostCreateRequest.builder()
                 .title(title)
                 .content(content)
