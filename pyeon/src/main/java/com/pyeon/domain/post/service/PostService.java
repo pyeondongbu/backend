@@ -11,5 +11,11 @@ public interface PostService {
     PostResponse getPost(Long id);
     Page<PostResponse> getPosts(Pageable pageable);
     void updatePost(Long id, PostUpdateRequest request, String email);
+
+    boolean hasLiked(Long postId, String email);
+
+    void likePost(Long postId, String email);
+
     void deletePost(Long id, String email);
+
 }

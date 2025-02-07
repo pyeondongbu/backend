@@ -3,6 +3,8 @@ package com.pyeon.domain.auth.config;
 import com.pyeon.domain.auth.filter.JwtAuthenticationFilter;
 import com.pyeon.domain.auth.handler.JwtAccessDeniedHandler;
 import com.pyeon.domain.auth.handler.JwtAuthenticationEntryPoint;
+import com.pyeon.domain.auth.handler.OAuth2AuthenticationSuccessHandler;
+import com.pyeon.domain.auth.service.CustomOAuth2UserService;
 import com.pyeon.domain.auth.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +39,8 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
     private final JwtAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     /**
      * Spring Security FilterChain 설정
@@ -62,7 +66,7 @@ public class SecurityConfig {
                 // URL별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 가능한 경로 설정
-                        .requestMatchers("/api/auth/**", "/api/posts").permitAll()
+                        .requestMatchers("/api/auth/**", "/oauth2/**", "/api/test/**").permitAll()
                         // 관리자 권한이 필요한 경로 설정
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // 그 외 모든 요청은 인증 필요
@@ -71,6 +75,13 @@ public class SecurityConfig {
                 // JWT 인증 필터 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class)
+                // OAuth2 로그인 설정
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                )
                 // 예외 처리 설정
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(accessDeniedHandler)  // 권한 부족 시 처리

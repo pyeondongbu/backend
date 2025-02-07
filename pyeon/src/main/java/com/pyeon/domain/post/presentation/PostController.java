@@ -1,10 +1,17 @@
 package com.pyeon.domain.post.presentation;
 
+import com.pyeon.domain.auth.domain.UserPrincipal;
+import com.pyeon.domain.post.dto.request.PostCreateRequest;
+import com.pyeon.domain.post.dto.request.PostUpdateRequest;
+import com.pyeon.domain.post.dto.response.PostResponse;
+import com.pyeon.domain.post.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
