@@ -33,7 +33,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public Map<String, Object> getAttributes() {
-        return Collections.emptyMap();  // OAuth2 attributes는 더 이상 저장할 필요 없음
+        return Collections.emptyMap();
     }
 
     @Override

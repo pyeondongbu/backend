@@ -60,10 +60,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private Member createMember(Map<String, Object> attributes) {
+
+        String email = (String) attributes.get("email");
+        String name = (String) attributes.get("name");
+        String picture = (String) attributes.get("picture");
+
+        String nickname = (name != null) ? name : email.split("@")[0];
+
         return memberRepository.save(Member.builder()
-                .email((String) attributes.get("email"))
-                .nickname((String) attributes.get("name"))
-                .profileImageUrl((String) attributes.get("picture"))
+                .email(email)
+                .nickname(nickname)
+                .profileImageUrl(picture)
                 .build());
     }
 } 
