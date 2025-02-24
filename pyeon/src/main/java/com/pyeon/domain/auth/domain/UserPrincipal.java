@@ -1,5 +1,6 @@
 package com.pyeon.domain.auth.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,26 +11,13 @@ import java.util.Collections;
 import java.util.Map;
 
 @Getter
+@Builder
 public class UserPrincipal implements OAuth2User, UserDetails {
     private final Long id;
     private final String email;
     private final String nickname;
     private final String profileImageUrl;
     private final Collection<? extends GrantedAuthority> authorities;
-
-    public UserPrincipal(
-            Long id, 
-            String email, 
-            String nickname,
-            String profileImageUrl,
-            Collection<? extends GrantedAuthority> authorities
-    ) {
-        this.id = id;
-        this.email = email;
-        this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
-        this.authorities = authorities;
-    }
 
     @Override
     public Map<String, Object> getAttributes() {

@@ -27,19 +27,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String token = resolveToken(request);
-        log.debug("Resolved token: {}", token);  // 디버깅용
 
-        try {
-            if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
-                Authentication authentication = jwtProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("Set Authentication to security context for '{}', uri: {}", 
-                    authentication.getName(), request.getRequestURI());
-            } else {
-                log.debug("No valid JWT token found, uri: {}", request.getRequestURI());
-            }
-        } catch (Exception e) {
-            log.error("Cannot set user authentication: {}", e.getMessage());
+        if (StringUtils.hasText(token) && jwtProvider.validateToken(token)) {
+            Authentication authentication = jwtProvider.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
