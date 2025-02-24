@@ -3,6 +3,8 @@ package com.pyeon.global.dto;
 import com.pyeon.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Getter
@@ -27,3 +29,4 @@ public class ApiResponse<T> {
         this.message = message;
     }
 }
+

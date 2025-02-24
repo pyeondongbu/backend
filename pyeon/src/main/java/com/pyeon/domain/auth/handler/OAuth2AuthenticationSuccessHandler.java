@@ -12,10 +12,12 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.Duration;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -23,6 +25,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     
     @Value("${app.oauth2.authorized-redirect-uri}")
     private String redirectUri;
+    
+    @Value("${app.cookie.secure}")
+    private boolean secureCookie;
+    
+    @Value("${app.cookie.domain}")
+    private String cookieDomain;
 
     @Override
     public void onAuthenticationSuccess(
@@ -33,19 +41,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         TokenResponse tokenResponse = authService.createToken(oauth2User);
 
-        // 쿠키 생성
         ResponseCookie cookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
                 .httpOnly(true)
-                .secure(true) // HTTPS에서만 전송
-                .sameSite("Lax") // CSRF 보호
-                .path("/") // 모든 경로에서 접근 가능
-                .maxAge(Duration.ofHours(1)) // JWT 만료시간과 동일하게 설정
-                .domain("localhost") // 개발 환경
+                .secure(secureCookie) // 환경 변수에 따라 설정
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofHours(1))
+                .domain(cookieDomain)
                 .build();
-
+        
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        // 토큰 없이 프론트엔드로 리다이렉트
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 } 

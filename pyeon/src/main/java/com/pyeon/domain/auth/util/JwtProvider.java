@@ -2,6 +2,8 @@ package com.pyeon.domain.auth.util;
 
 import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.auth.service.CustomUserDetailsService;
+import com.pyeon.global.exception.CustomException;
+import com.pyeon.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,10 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -81,22 +80,27 @@ public class JwtProvider {
      * @return Authentication 인증 객체
      */
     public Authentication getAuthentication(String token) {
+
         Claims claims = parseClaims(token);
+
         String email = claims.getSubject();
         Long id = claims.get("id", Long.class);
         String nickname = claims.get("nickname", String.class);
         String profileImageUrl = claims.get("profileImageUrl", String.class);
+
+
         Collection<? extends GrantedAuthority> authorities = ((List<?>) claims.get("authorities")).stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .collect(Collectors.toList());
 
-        UserPrincipal userPrincipal = new UserPrincipal(
-                id, 
-                email, 
-                nickname,
-                profileImageUrl,
-                authorities
-        );
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(id)
+                .email(email)
+                .nickname(nickname)
+                .profileImageUrl(profileImageUrl)
+                .authorities(authorities)
+                .build();
+
 
         return new UsernamePasswordAuthenticationToken(userPrincipal, "", authorities);
     }
@@ -112,16 +116,15 @@ public class JwtProvider {
         try {
             Claims claims = parseClaims(token);
             return !claims.getExpiration().before(new Date());
-        } catch (SecurityException | MalformedJwtException e) {
-            log.error("잘못된 JWT 서명입니다: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT 토큰입니다: {}", e.getMessage());
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        } catch (SecurityException | MalformedJwtException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         } catch (UnsupportedJwtException e) {
-            log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         } catch (IllegalArgumentException e) {
-            log.error("JWT 토큰이 잘못되었습니다: {}", e.getMessage());
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        return false;
     }
 
     /**

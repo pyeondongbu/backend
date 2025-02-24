@@ -22,12 +22,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
 
-        return new UserPrincipal(
-                member.getId(),
-                member.getEmail(),
-                member.getNickname(),
-                member.getProfileImageUrl(),
-                Collections.singleton(member.getAuthority())
-        );
+        return UserPrincipal.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .profileImageUrl(member.getProfileImageUrl())
+                .authorities(Collections.singleton(member.getAuthority()))
+                .build();
     }
 } 
