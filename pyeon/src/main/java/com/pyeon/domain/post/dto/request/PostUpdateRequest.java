@@ -1,6 +1,8 @@
 package com.pyeon.domain.post.dto.request;
 
+import com.pyeon.domain.post.domain.Category;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,16 +17,29 @@ public class PostUpdateRequest {
     @NotBlank(message = "내용은 필수입니다")
     private String content;
 
+    @NotNull(message = "카테고리는 필수입니다")
+    private Category category;
+
     @Builder(access = AccessLevel.PRIVATE)
-    private PostUpdateRequest(String title, String content) {
+    private PostUpdateRequest(
+            final String title,
+            final String content,
+            final Category category
+    ) {
         this.title = title;
         this.content = content;
+        this.category = category;
     }
 
-    public static PostUpdateRequest of(String title, String content) {
+    public static PostUpdateRequest of(
+            final String title,
+            final String content,
+            final Category category
+    ) {
         return PostUpdateRequest.builder()
                 .title(title)
                 .content(content)
+                .category(category)
                 .build();
     }
 } 

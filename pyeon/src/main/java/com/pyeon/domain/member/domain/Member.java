@@ -7,10 +7,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "is_active = true")
+@SQLDelete(sql = "UPDATE member SET is_active = false WHERE id = ?")
 public class Member extends BaseTimeEntity {
 
     @Id
@@ -29,12 +33,16 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Authority authority;
 
+    @Column(nullable = false)
+    private boolean isActive;
+
     @Builder
     public Member(String email, String nickname, String profileImageUrl) {
         this.email = email;
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.authority = Authority.ROLE_USER;  // 기본 권한은 USER
+        this.authority = Authority.ROLE_USER;
+        this.isActive = true;
     }
 
     public void updateProfile(String nickname, String profileImageUrl) {
@@ -46,5 +54,22 @@ public class Member extends BaseTimeEntity {
         this.authority = Authority.ROLE_ADMIN;
     }
 
+    // 특정 권한을 가지고 있는지 확인
+    public boolean hasRole(Authority authority) {
+        return this.authority == authority;
+    }
 
+    // 관리자인지 확인
+    public boolean isAdmin() {
+        return this.authority == Authority.ROLE_ADMIN;
+    }
+
+    // 본인 확인
+    public boolean isOwner(String email) {
+        return this.email.equals(email);
+    }
+
+    public void delete() {
+        this.isActive = false;
+    }
 }

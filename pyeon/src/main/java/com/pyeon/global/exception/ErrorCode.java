@@ -37,7 +37,11 @@ public enum ErrorCode {
     // Post 관련 에러
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_001", "게시글을 찾을 수 없습니다."),
     NOT_POST_AUTHOR(HttpStatus.FORBIDDEN, "POST_002", "게시글의 작성자가 아닙니다."),
-    ALREADY_LIKED_POST(HttpStatus.CONFLICT, "POST_003", "이미 좋아요를 누른 게시글입니다.");
+    ALREADY_LIKED_POST(HttpStatus.CONFLICT, "POST_003", "이미 좋아요를 누른 게시글입니다."),
+
+    // Comment 관련 에러
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_001", "댓글을 찾을 수 없습니다."),
+    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "COMMENT_002", "댓글의 작성자가 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

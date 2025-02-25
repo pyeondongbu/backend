@@ -20,8 +20,15 @@ services:
     environment:
       - MYSQL_DATABASE=pyeon
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --default-time-zone=+09:00
     volumes:
       - mysql_data_dev:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
 
 volumes:
   mysql_data_dev:
