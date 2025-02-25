@@ -28,11 +28,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Long createPost(PostCreateRequest request, String email) {
-        Member member = findMemberByEmail(email);
+    public Long createPost(PostCreateRequest request, Long memberId) {
+        Member member = findMemberById(memberId);
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
+                .category(request.getCategory())
                 .member(member)
                 .build();
         return postRepository.save(post).getId();
@@ -54,53 +55,67 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void updatePost(Long id, PostUpdateRequest request, String email) {
-        Post post = findPostById(id);
-        validateAuthor(post, email);
-        post.update(request.getTitle(), request.getContent());
+    public void updatePost(Long postId, PostUpdateRequest request, Long memberId) {
+        Post post = findPostById(postId);
+        Member member = findMemberById(memberId);
+        
+        if (!post.isWriter(member)) {
+            throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
+        }
+        
+        post.update(
+                request.getTitle(),
+                request.getContent(),
+                request.getCategory()
+        );
     }
 
     @Override
     @Transactional
-    public void deletePost(Long id, String email) {
-        Post post = findPostById(id);
-        validateAuthor(post, email);
+    public void deletePost(Long postId, Long memberId) {
+        Post post = findPostById(postId);
+        Member member = findMemberById(memberId);
+        
+        if (!post.isWriter(member) && !member.isAdmin()) {
+            throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
+        }
+        
         postRepository.delete(post);
     }
 
     @Override
     @Transactional
-    public void likePost(Long postId, String email) {
+    public void likePost(Long postId, Long memberId) {
         String key = LIKE_KEY_PREFIX + postId;
-        Long addResult = redisTemplate.opsForSet().add(key, email);
+        Long addResult = redisTemplate.opsForSet().add(key, String.valueOf(memberId));
         
-        if (addResult == 1) {  // 새로운 좋아요인 경우
+        if (addResult == 1) {
             Post post = findPostById(postId);
             post.like();
-        } else {  // 이미 좋아요를 누른 경우
+        } else {
             throw new CustomException(ErrorCode.ALREADY_LIKED_POST);
         }
     }
 
     @Override
-    public boolean hasLiked(Long postId, String email) {
+    public boolean hasLiked(Long postId, Long memberId) {
         String key = LIKE_KEY_PREFIX + postId;
-        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, email));
+        return Boolean.TRUE.equals(
+            redisTemplate.opsForSet().isMember(key, String.valueOf(memberId))
+        );
     }
+
+    /**
+     * Private 함수들
+     */
 
     private Post findPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
 
-    private Member findMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
+    private Member findMemberById(Long id) {
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-    }
-
-    private void validateAuthor(Post post, String email) {
-        if (!post.isAuthor(email)) {
-            throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
-        }
     }
 }

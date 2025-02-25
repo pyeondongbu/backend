@@ -1,5 +1,6 @@
 package com.pyeon.domain.post.dto.response;
 
+import com.pyeon.domain.post.domain.Category;
 import com.pyeon.domain.post.domain.Post;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,6 +22,8 @@ public class PostResponse {
     private long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private Category category;
+    private List<CommentResponse> comments;
 
     @Builder(access = AccessLevel.PRIVATE)
     private PostResponse(
@@ -31,7 +35,9 @@ public class PostResponse {
             long viewCount,
             long likeCount,
             LocalDateTime createdAt,
-            LocalDateTime modifiedAt
+            LocalDateTime modifiedAt,
+            Category category,
+            List<CommentResponse> comments
     ) {
         this.id = id;
         this.title = title;
@@ -42,6 +48,8 @@ public class PostResponse {
         this.likeCount = likeCount;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
+        this.category = category;
+        this.comments = comments;
     }
 
     public static PostResponse from(Post post) {
@@ -55,6 +63,8 @@ public class PostResponse {
                 .likeCount(post.getLikeCount())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
+                .category(post.getCategory())
+                .comments(post.getComments().stream().map(CommentResponse::from).toList())
                 .build();
     }
 } 

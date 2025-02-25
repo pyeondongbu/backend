@@ -7,15 +7,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface PostService {
-    Long createPost(PostCreateRequest request, String email);
+    Long createPost(PostCreateRequest request, Long memberId);
+    
     PostResponse getPost(Long id);
+    
     Page<PostResponse> getPosts(Pageable pageable);
-    void updatePost(Long id, PostUpdateRequest request, String email);
-
-    boolean hasLiked(Long postId, String email);
-
-    void likePost(Long postId, String email);
-
-    void deletePost(Long id, String email);
-
+    
+    void updatePost(Long postId, PostUpdateRequest request, Long memberId);
+    
+    void deletePost(Long postId, Long memberId);
+    
+    void likePost(Long postId, Long memberId);
+    
+    boolean hasLiked(Long postId, Long memberId);
 }

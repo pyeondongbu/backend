@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,15 +38,23 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isActive;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Builder
-    public Post(String title, String content, Member member) {
+    public Post(String title, String content, Member member, Category category) {
         this.title = title;
         this.content = content;
         this.member = member;
+        this.category = category;
         this.viewCount = 0;
         this.likeCount = 0;
         this.isActive = true;
@@ -57,13 +68,18 @@ public class Post extends BaseTimeEntity {
         this.likeCount++;
     }
 
-    public void update(String title, String content) {
+    public void update(
+        final String title, 
+        final String content, 
+        final Category category
+    ) {
         this.title = title;
         this.content = content;
+        this.category = category;
     }
 
-    public boolean isAuthor(String email) {
-        return member.getEmail().equals(email);
+    public boolean isWriter(Member member) {
+        return this.member.getId().equals(member.getId());
     }
 
     public void delete() {
