@@ -3,6 +3,7 @@ package com.pyeon.domain.post.service;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.post.dao.PostRepository;
+import com.pyeon.domain.post.domain.Category;
 import com.pyeon.domain.post.domain.Post;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
@@ -12,9 +13,15 @@ import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import static com.pyeon.domain.post.dao.PostSpecification.isPopular;
+import static com.pyeon.domain.post.dao.PostSpecification.withCategory;
+import static com.pyeon.domain.post.dao.PostSpecification.containsText;
 
 @Service
 @RequiredArgsConstructor
@@ -48,8 +55,28 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<PostResponse> getPosts(Pageable pageable) {
-        return postRepository.findAll(pageable)
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPosts(
+            Category category, 
+            String searchText,
+            boolean onlyPopular, 
+            Pageable pageable
+    ) {
+        Specification<Post> spec = Specification.where(null);
+        
+        if (category != null) {
+            spec = spec.and(withCategory(category));
+        }
+        
+        if (StringUtils.hasText(searchText)) {
+            spec = spec.and(containsText(searchText));
+        }
+        
+        if (onlyPopular) {
+            spec = spec.and(isPopular());
+        }
+                
+        return postRepository.findAll(spec, pageable)
                 .map(PostResponse::from);
     }
 

@@ -1,6 +1,7 @@
 package com.pyeon.domain.post.presentation;
 
 import com.pyeon.domain.auth.domain.UserPrincipal;
+import com.pyeon.domain.post.domain.Category;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
@@ -9,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,8 +44,13 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> getPosts(Pageable pageable) {
-        return ResponseEntity.ok(postService.getPosts(pageable));
+    public ResponseEntity<Page<PostResponse>> getPosts(
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) String searchText,
+            @RequestParam(defaultValue = "false") boolean onlyPopular,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(postService.getPosts(category, searchText, onlyPopular, pageable));
     }
 
     @PutMapping("/{postId}")

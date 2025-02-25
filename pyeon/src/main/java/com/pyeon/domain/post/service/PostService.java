@@ -1,5 +1,6 @@
 package com.pyeon.domain.post.service;
 
+import com.pyeon.domain.post.domain.Category;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
@@ -10,9 +11,13 @@ public interface PostService {
     Long createPost(PostCreateRequest request, Long memberId);
     
     PostResponse getPost(Long id);
-    
-    Page<PostResponse> getPosts(Pageable pageable);
-    
+
+    public Page<PostResponse> getPosts(
+            Category category,
+            String searchText,
+            boolean onlyPopular,
+            Pageable pageable
+    );
     void updatePost(Long postId, PostUpdateRequest request, Long memberId);
     
     void deletePost(Long postId, Long memberId);
