@@ -13,8 +13,4 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
     boolean existsByEmail(String email);
-
-    // findByIdWithPosts 메서드 잠시 주석 처리
-    // @Query("SELECT m FROM Member m LEFT JOIN FETCH m.posts WHERE m.id = :id")
-    // Optional<Member> findByIdWithPosts(Long id);
 }

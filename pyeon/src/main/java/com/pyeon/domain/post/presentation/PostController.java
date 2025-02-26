@@ -92,4 +92,22 @@ public class PostController {
     ) {
         return ResponseEntity.ok(postService.hasLiked(postId, principal.getId()));
     }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Page<PostResponse>> getMyPosts(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(postService.getPostsByMemberId(principal.getId(), pageable));
+    }
+
+    @GetMapping("/members/{memberId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Page<PostResponse>> getMemberPosts(
+            @PathVariable Long memberId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(postService.getPostsByMemberId(memberId, pageable));
+    }
 }

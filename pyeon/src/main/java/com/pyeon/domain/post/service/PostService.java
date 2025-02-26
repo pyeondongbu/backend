@@ -18,6 +18,9 @@ public interface PostService {
             boolean onlyPopular,
             Pageable pageable
     );
+
+    Page<PostResponse> getPostsByMemberId(Long memberId, Pageable pageable);
+    
     void updatePost(Long postId, PostUpdateRequest request, Long memberId);
     
     void deletePost(Long postId, Long memberId);
