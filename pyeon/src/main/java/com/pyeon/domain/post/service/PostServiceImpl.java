@@ -132,6 +132,18 @@ public class PostServiceImpl implements PostService {
         );
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostResponse> getPostsByMemberId(Long memberId, Pageable pageable) {
+        Member member = findMemberById(memberId);
+        Specification<Post> spec = Specification.where((root, query, builder) ->
+            builder.equal(root.get("member"), member)
+        );
+        
+        return postRepository.findAll(spec, pageable)
+                .map(PostResponse::from);
+    }
+
     /**
      * Private 함수들
      */
