@@ -68,6 +68,10 @@ public class Post extends BaseTimeEntity {
         this.likeCount++;
     }
 
+    public void unlike() {
+        this.likeCount = Math.max(0, this.likeCount - 1);  // 음수 방지
+    }
+
     public void update(
         final String title, 
         final String content, 

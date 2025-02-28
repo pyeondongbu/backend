@@ -48,10 +48,17 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponse getPost(Long id) {
+    public PostResponse getPost(Long id, Long memberId) {
         Post post = findPostById(id);
         post.incrementViewCount();
-        return PostResponse.from(post);
+        
+        boolean hasLiked = false;
+        
+        if (memberId != null) {
+            hasLiked = hasLiked(post.getId(), memberId);
+        }
+        
+        return PostResponse.from(post, hasLiked);
     }
 
     @Override
@@ -107,29 +114,38 @@ public class PostServiceImpl implements PostService {
             throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
         }
         
+        try {
+            String key = LIKE_KEY_PREFIX + postId;
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
+        
         postRepository.delete(post);
     }
 
     @Override
     @Transactional
     public void likePost(Long postId, Long memberId) {
+        Post post = findPostById(postId);
         String key = LIKE_KEY_PREFIX + postId;
-        Long addResult = redisTemplate.opsForSet().add(key, String.valueOf(memberId));
         
-        if (addResult == 1) {
-            Post post = findPostById(postId);
-            post.like();
-        } else {
-            throw new CustomException(ErrorCode.ALREADY_LIKED_POST);
+        try {
+            Boolean hasLiked = redisTemplate.opsForSet().isMember(key, String.valueOf(memberId));
+            
+            if (Boolean.TRUE.equals(hasLiked)) {
+                redisTemplate.opsForSet().remove(key, String.valueOf(memberId));
+                post.unlike();
+            } else {
+                redisTemplate.opsForSet().add(key, String.valueOf(memberId));
+                post.like();
+            }
+            
+            redisTemplate.persist(key);
+            postRepository.save(post);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
-    }
-
-    @Override
-    public boolean hasLiked(Long postId, Long memberId) {
-        String key = LIKE_KEY_PREFIX + postId;
-        return Boolean.TRUE.equals(
-            redisTemplate.opsForSet().isMember(key, String.valueOf(memberId))
-        );
     }
 
     @Override
@@ -147,6 +163,17 @@ public class PostServiceImpl implements PostService {
     /**
      * Private 함수들
      */
+
+    private boolean hasLiked(Long postId, Long memberId) {
+        String key = LIKE_KEY_PREFIX + postId;
+        try {
+            return Boolean.TRUE.equals(
+                redisTemplate.opsForSet().isMember(key, String.valueOf(memberId))
+            );
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
+    }
 
     private Post findPostById(Long id) {
         return postRepository.findById(id)

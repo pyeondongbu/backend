@@ -41,7 +41,10 @@ public enum ErrorCode {
 
     // Comment 관련 에러
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_001", "댓글을 찾을 수 없습니다."),
-    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "COMMENT_002", "댓글의 작성자가 아닙니다.");
+    NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "COMMENT_002", "댓글의 작성자가 아닙니다."),
+    
+    // Redis 관련 에러
+    REDIS_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "REDIS_001", "Redis 서버 연결에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

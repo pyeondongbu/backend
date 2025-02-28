@@ -35,11 +35,12 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PostResponse> getPost(
-            @PathVariable(name = "postId") Long postId
+            @PathVariable(name = "postId") Long postId,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        PostResponse response = postService.getPost(postId);
+        Long memberId = principal != null ? principal.getId() : null;
+        PostResponse response = postService.getPost(postId, memberId);
         return ResponseEntity.ok(response);
     }
 
@@ -83,16 +84,7 @@ public class PostController {
         postService.likePost(postId, principal.getId());
         return ResponseEntity.ok().build();
     }
-
-    @GetMapping("/{postId}/like")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Boolean> hasLiked(
-            @PathVariable(name = "postId") Long postId,
-            @AuthenticationPrincipal UserPrincipal principal
-    ) {
-        return ResponseEntity.ok(postService.hasLiked(postId, principal.getId()));
-    }
-
+    
     @GetMapping("/my")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<PostResponse>> getMyPosts(
