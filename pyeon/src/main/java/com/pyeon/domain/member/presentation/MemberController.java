@@ -26,7 +26,7 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@memberAuthChecker.canAccess(#memberId, principal)")
     public ResponseEntity<MemberResponse> getMember(
             @PathVariable Long memberId
     ) {
@@ -34,7 +34,7 @@ public class MemberController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@memberAuthChecker.isOwner(#principal.id, principal)")
     public ResponseEntity<Void> updateMyInfo(
             @RequestBody @Valid MemberUpdateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
@@ -44,7 +44,7 @@ public class MemberController {
     }
 
     @DeleteMapping("/me")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@memberAuthChecker.isOwner(#principal.id, principal)")
     public ResponseEntity<Void> deleteMyAccount(
             @AuthenticationPrincipal UserPrincipal principal
     ) {

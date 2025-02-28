@@ -91,12 +91,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void updatePost(Long postId, PostUpdateRequest request, Long memberId) {
         Post post = findPostById(postId);
-        Member member = findMemberById(memberId);
-        
-        if (!post.isWriter(member)) {
-            throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
-        }
-        
         post.update(
                 request.getTitle(),
                 request.getContent(),
@@ -108,11 +102,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
-        Member member = findMemberById(memberId);
-        
-        if (!post.isWriter(member) && !member.isAdmin()) {
-            throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
-        }
         
         try {
             String key = LIKE_KEY_PREFIX + postId;

@@ -55,7 +55,7 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
     public ResponseEntity<Void> updatePost(
             @PathVariable(name = "postId") Long postId,
             @RequestBody @Valid PostUpdateRequest request,
@@ -66,7 +66,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
     public ResponseEntity<Void> deletePost(
             @PathVariable(name = "postId") Long postId,
             @AuthenticationPrincipal UserPrincipal principal
