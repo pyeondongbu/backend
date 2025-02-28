@@ -17,6 +17,10 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_001", "사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "MEMBER_002", "이미 존재하는 이메일입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER_003", "잘못된 비밀번호입니다."),
+    MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "MEMBER_004", "일시 정지된 회원입니다."),
+    MEMBER_BANNED(HttpStatus.FORBIDDEN, "MEMBER_005", "영구 정지된 회원입니다."),
+    ADMIN_NOT_SUSPENDABLE(HttpStatus.FORBIDDEN, "MEMBER_006", "관리자는 제재할 수 없습니다."),
+    MEMBER_DEACTIVATED(HttpStatus.FORBIDDEN, "MEMBER_007", "비활성화된 회원입니다."),
 
     // Request 관련 에러
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "REQ_001", "잘못된 요청입니다."),

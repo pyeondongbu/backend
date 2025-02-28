@@ -25,7 +25,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @postAuthChecker.canWrite(principal)")
     public ResponseEntity<Long> createPost(
             @RequestBody @Valid PostCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
@@ -55,7 +55,7 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
     public ResponseEntity<Void> updatePost(
             @PathVariable(name = "postId") Long postId,
             @RequestBody @Valid PostUpdateRequest request,
@@ -66,7 +66,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
     public ResponseEntity<Void> deletePost(
             @PathVariable(name = "postId") Long postId,
             @AuthenticationPrincipal UserPrincipal principal
@@ -76,7 +76,7 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/like")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @postAuthChecker.canWrite(principal)")
     public ResponseEntity<Void> likePost(
             @PathVariable(name = "postId") Long postId,
             @AuthenticationPrincipal UserPrincipal principal

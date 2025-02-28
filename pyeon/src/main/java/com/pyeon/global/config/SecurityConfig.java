@@ -22,10 +22,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(securedEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -44,8 +45,19 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/oauth2/**").permitAll()
+                        .requestMatchers(
+                            "/",
+                            "/error",
+                            "/favicon.ico",
+                            "/api/auth/**",
+                            "/oauth2/**"
+                        ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/posts").permitAll()
+                        .requestMatchers("/api/posts/{postId}").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
