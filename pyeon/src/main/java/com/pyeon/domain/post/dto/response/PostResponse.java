@@ -24,6 +24,7 @@ public class PostResponse {
     private LocalDateTime modifiedAt;
     private Category category;
     private List<CommentResponse> comments;
+    private boolean hasLiked;
 
     @Builder(access = AccessLevel.PRIVATE)
     private PostResponse(
@@ -37,7 +38,8 @@ public class PostResponse {
             LocalDateTime createdAt,
             LocalDateTime modifiedAt,
             Category category,
-            List<CommentResponse> comments
+            List<CommentResponse> comments,
+            boolean hasLiked
     ) {
         this.id = id;
         this.title = title;
@@ -50,9 +52,10 @@ public class PostResponse {
         this.modifiedAt = modifiedAt;
         this.category = category;
         this.comments = comments;
+        this.hasLiked = hasLiked;
     }
 
-    public static PostResponse from(Post post) {
+    public static PostResponse from(Post post, boolean hasLiked) {
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -65,6 +68,11 @@ public class PostResponse {
                 .modifiedAt(post.getModifiedAt())
                 .category(post.getCategory())
                 .comments(post.getComments().stream().map(CommentResponse::from).toList())
+                .hasLiked(hasLiked)
                 .build();
+    }
+
+    public static PostResponse from(Post post) {
+        return from(post, false);
     }
 } 

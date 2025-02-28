@@ -10,8 +10,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/pyeon?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=${DEV_DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DEV_DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=${DEV_REDIS_PASSWORD}
     depends_on:
       - db
+      - redis
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
@@ -29,6 +34,17 @@ services:
     volumes:
       - mysql_data_dev:/var/lib/mysql
       - ./mysql/conf.d:/etc/mysql/conf.d
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${DEV_REDIS_PASSWORD}"]
+    volumes:
+      - redis_data_dev:/data
+    restart: unless-stopped
 
 volumes:
   mysql_data_dev:
+  redis_data_dev:

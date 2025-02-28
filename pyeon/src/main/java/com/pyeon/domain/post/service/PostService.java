@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 public interface PostService {
     Long createPost(PostCreateRequest request, Long memberId);
     
-    PostResponse getPost(Long id);
+    PostResponse getPost(Long id, Long memberId);
 
     public Page<PostResponse> getPosts(
             Category category,
@@ -26,6 +26,4 @@ public interface PostService {
     void deletePost(Long postId, Long memberId);
     
     void likePost(Long postId, Long memberId);
-    
-    boolean hasLiked(Long postId, Long memberId);
 }
