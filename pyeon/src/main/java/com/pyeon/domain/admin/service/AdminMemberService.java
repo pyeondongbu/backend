@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface AdminMemberService {
     Page<MemberResponse> getAllMembers(Pageable pageable);
-    void suspendMember(Long memberId);
-    void banMember(Long memberId);
-    void activateMember(Long memberId);
+    void deactivateMember(Long memberId);  // 계정 정지
+    void activateMember(Long memberId);    // 정지 해제
 }

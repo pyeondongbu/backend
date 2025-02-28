@@ -2,6 +2,8 @@ package com.pyeon.domain.auth.checker;
 
 import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.post.dao.PostRepository;
+import com.pyeon.domain.member.dao.MemberRepository;
+import com.pyeon.domain.member.domain.Member;
 import com.pyeon.global.exception.CustomException;
 import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PostAuthChecker {
     private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
     
     public boolean isOwner(Long postId, UserPrincipal user) {
         if (user == null) {
@@ -37,6 +40,21 @@ public class PostAuthChecker {
             throw new CustomException(ErrorCode.NOT_POST_AUTHOR);
         }
         
+        return true;
+    }
+
+    public boolean canWrite(UserPrincipal user) {
+        if (user == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Member member = memberRepository.findById(user.getId())
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!member.isActive()) {
+            throw new CustomException(ErrorCode.MEMBER_DEACTIVATED);
+        }
+
         return true;
     }
 } 

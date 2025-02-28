@@ -26,18 +26,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
     @Override
     @Transactional
-    public void suspendMember(Long memberId) {
+    public void deactivateMember(Long memberId) {
         Member member = findMemberById(memberId);
-        validateNotAdmin(member);
-        member.suspend();
-    }
-
-    @Override
-    @Transactional
-    public void banMember(Long memberId) {
-        Member member = findMemberById(memberId);
-        validateNotAdmin(member);
-        member.ban();
+        member.delete();
     }
 
     @Override
@@ -50,11 +41,5 @@ public class AdminMemberServiceImpl implements AdminMemberService {
     private Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-    }
-
-    private void validateNotAdmin(Member member) {
-        if (member.isAdmin()) {
-            throw new CustomException(ErrorCode.ACCESS_DENIED, "관리자는 제재할 수 없습니다.");
-        }
     }
 } 

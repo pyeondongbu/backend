@@ -25,7 +25,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @postAuthChecker.canWrite(principal)")
     public ResponseEntity<Long> createPost(
             @RequestBody @Valid PostCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
@@ -76,7 +76,7 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/like")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @postAuthChecker.canWrite(principal)")
     public ResponseEntity<Void> likePost(
             @PathVariable(name = "postId") Long postId,
             @AuthenticationPrincipal UserPrincipal principal

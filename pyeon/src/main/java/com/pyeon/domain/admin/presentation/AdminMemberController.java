@@ -22,15 +22,9 @@ public class AdminMemberController {
         return ResponseEntity.ok(adminMemberService.getAllMembers(pageable));
     }
 
-    @PostMapping("/{memberId}/suspend")
-    public ResponseEntity<Void> suspendMember(@PathVariable Long memberId) {
-        adminMemberService.suspendMember(memberId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{memberId}/ban")
-    public ResponseEntity<Void> banMember(@PathVariable Long memberId) {
-        adminMemberService.banMember(memberId);
+    @PostMapping("/{memberId}/deactivate")
+    public ResponseEntity<Void> deactivateMember(@PathVariable Long memberId) {
+        adminMemberService.deactivateMember(memberId);
         return ResponseEntity.ok().build();
     }
 
