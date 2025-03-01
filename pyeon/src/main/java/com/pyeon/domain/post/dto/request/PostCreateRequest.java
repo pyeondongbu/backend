@@ -1,6 +1,7 @@
 package com.pyeon.domain.post.dto.request;
 
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -17,29 +18,36 @@ public class PostCreateRequest {
     @NotBlank(message = "내용은 필수입니다")
     private String content;
 
-    @NotNull(message = "카테고리는 필수입니다")
-    private Category category;
+    @NotNull(message = "메인 카테고리는 필수입니다")
+    private MainCategory mainCategory;
+
+    @NotNull(message = "서브 카테고리는 필수입니다")
+    private SubCategory subCategory;
 
     @Builder(access = AccessLevel.PRIVATE)
     private PostCreateRequest(
             final String title,
             final String content,
-            final Category category
+            final MainCategory mainCategory,
+            final SubCategory subCategory
     ) {
         this.title = title;
         this.content = content;
-        this.category = category;
+        this.mainCategory = mainCategory;
+        this.subCategory = subCategory;
     }
 
     public static PostCreateRequest of(
             final String title,
             final String content,
-            final Category category
+            final MainCategory mainCategory,
+            final SubCategory subCategory
     ) {
         return PostCreateRequest.builder()
                 .title(title)
                 .content(content)
-                .category(category)
+                .mainCategory(mainCategory)
+                .subCategory(subCategory)
                 .build();
     }
 } 

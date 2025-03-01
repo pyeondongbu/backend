@@ -1,6 +1,7 @@
 package com.pyeon.domain.post.dao;
 
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.domain.post.domain.Post;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -9,10 +10,17 @@ import org.springframework.util.StringUtils;
 @Component
 public class PostSpecification {
     
-    public static Specification<Post> withCategory(Category category) {
+    public static Specification<Post> withMainCategory(MainCategory mainCategory) {
         return (root, query, cb) -> {
-            if (category == null) return null;
-            return cb.equal(root.get("category"), category);
+            if (mainCategory == null) return null;
+            return cb.equal(root.get("mainCategory"), mainCategory);
+        };
+    }
+    
+    public static Specification<Post> withSubCategory(SubCategory subCategory) {
+        return (root, query, cb) -> {
+            if (subCategory == null) return null;
+            return cb.equal(root.get("subCategory"), subCategory);
         };
     }
     

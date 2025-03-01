@@ -26,7 +26,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping
-    public ResponseEntity<ImageRes> uploadImage(@RequestPart("image") MultipartFile image) {
+    public ResponseEntity<ImageRes> uploadImage(@RequestPart(name = "image") MultipartFile image) {
         final ImageRes imageResponse = imageService.save(image);
         return ResponseEntity.created(URI.create(imageResponse.getImageUrl())).body(imageResponse);
     }

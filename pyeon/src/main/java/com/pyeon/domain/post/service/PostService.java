@@ -1,9 +1,11 @@
 package com.pyeon.domain.post.service;
 
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
+import com.pyeon.domain.post.dto.response.PostSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -13,13 +15,24 @@ public interface PostService {
     PostResponse getPost(Long id, Long memberId);
 
     public Page<PostResponse> getPosts(
-            Category category,
+            MainCategory mainCategory,
+            SubCategory subCategory,
+            String searchText,
+            boolean onlyPopular,
+            Pageable pageable
+    );
+
+    public Page<PostSummaryResponse> getPostsSummary(
+            MainCategory mainCategory,
+            SubCategory subCategory,
             String searchText,
             boolean onlyPopular,
             Pageable pageable
     );
 
     Page<PostResponse> getPostsByMemberId(Long memberId, Pageable pageable);
+    
+    Page<PostSummaryResponse> getPostsSummaryByMemberId(Long memberId, Pageable pageable);
     
     void updatePost(Long postId, PostUpdateRequest request, Long memberId);
     
