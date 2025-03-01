@@ -50,7 +50,8 @@ public class SecurityConfig {
                             "/error",
                             "/favicon.ico",
                             "/api/auth/**",
-                            "/oauth2/**"
+                            "/oauth2/**",
+                            "/api/images/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/posts").permitAll()

@@ -48,7 +48,17 @@ public enum ErrorCode {
     NOT_COMMENT_AUTHOR(HttpStatus.FORBIDDEN, "COMMENT_002", "댓글의 작성자가 아닙니다."),
     
     // Redis 관련 에러
-    REDIS_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "REDIS_001", "Redis 서버 연결에 실패했습니다.");
+    REDIS_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "REDIS_001", "Redis 서버 연결에 실패했습니다."),
+    
+    // 이미지 관련 에러
+    NULL_IMAGE(HttpStatus.BAD_REQUEST, "IMG_001", "이미지가 없습니다."),
+    EMPTY_IMAGE(HttpStatus.BAD_REQUEST, "IMG_002", "이미지가 비어있습니다."),
+    INVALID_IMAGE(HttpStatus.BAD_REQUEST, "IMG_003", "유효하지 않은 이미지입니다."),
+    INVALID_IMAGE_PATH(HttpStatus.BAD_REQUEST, "IMG_004", "유효하지 않은 이미지 경로입니다."),
+    FAIL_IMAGE_NAME_HASH(HttpStatus.INTERNAL_SERVER_ERROR, "IMG_005", "이미지 이름 해싱에 실패했습니다."),
+    EMPTY_IMAGE_LIST(HttpStatus.BAD_REQUEST, "IMG_006", "이미지 목록이 비어있습니다."),
+    EXCEED_IMAGE_LIST_SIZE(HttpStatus.BAD_REQUEST, "IMG_007", "이미지 목록 크기를 초과했습니다."),
+    EXCEED_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "IMG_008", "이미지 크기가 5MB를 초과했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
