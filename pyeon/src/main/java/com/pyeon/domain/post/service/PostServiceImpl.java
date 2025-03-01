@@ -55,13 +55,13 @@ public class PostServiceImpl implements PostService {
     public PostResponse getPost(Long id, Long memberId) {
         Post post = findPostById(id);
         post.incrementViewCount();
-        
+
         boolean hasLiked = false;
-        
+
         if (memberId != null) {
             hasLiked = hasLiked(post.getId(), memberId);
         }
-        
+
         return PostResponse.from(post, hasLiked);
     }
 
@@ -112,7 +112,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(Long postId, Long memberId) {
         Post post = findPostById(postId);
-        
+
         try {
             String key = LIKE_KEY_PREFIX + postId;
             redisTemplate.delete(key);
@@ -200,6 +200,13 @@ public class PostServiceImpl implements PostService {
         
         return postRepository.findAll(spec, pageable)
                 .map(PostSummaryResponse::from);
+    }
+
+    @Transactional
+    public void incrementViewCount(Long postId) {
+        Post post = findPostById(postId);
+        post.incrementViewCount();
+        postRepository.save(post);
     }
 
     /**
