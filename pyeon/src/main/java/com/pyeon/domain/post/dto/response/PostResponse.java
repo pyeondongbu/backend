@@ -1,6 +1,7 @@
 package com.pyeon.domain.post.dto.response;
 
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.domain.post.domain.Post;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,7 +23,8 @@ public class PostResponse {
     private long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private Category category;
+    private MainCategory mainCategory;
+    private SubCategory subCategory;
     private List<CommentResponse> comments;
     private boolean hasLiked;
 
@@ -37,7 +39,8 @@ public class PostResponse {
             long likeCount,
             LocalDateTime createdAt,
             LocalDateTime modifiedAt,
-            Category category,
+            MainCategory mainCategory,
+            SubCategory subCategory,
             List<CommentResponse> comments,
             boolean hasLiked
     ) {
@@ -50,7 +53,8 @@ public class PostResponse {
         this.likeCount = likeCount;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
-        this.category = category;
+        this.mainCategory = mainCategory;
+        this.subCategory = subCategory;
         this.comments = comments;
         this.hasLiked = hasLiked;
     }
@@ -66,7 +70,8 @@ public class PostResponse {
                 .likeCount(post.getLikeCount())
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
-                .category(post.getCategory())
+                .mainCategory(post.getMainCategory())
+                .subCategory(post.getSubCategory())
                 .comments(post.getComments().stream().map(CommentResponse::from).toList())
                 .hasLiked(hasLiked)
                 .build();

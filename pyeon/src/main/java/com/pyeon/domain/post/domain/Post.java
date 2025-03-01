@@ -1,6 +1,8 @@
 package com.pyeon.domain.post.domain;
 
 import com.pyeon.domain.member.domain.Member;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -40,7 +42,11 @@ public class Post extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private MainCategory mainCategory;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SubCategory subCategory;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
@@ -50,11 +56,12 @@ public class Post extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    public Post(String title, String content, Member member, Category category) {
+    public Post(String title, String content, Member member, MainCategory mainCategory, SubCategory subCategory) {
         this.title = title;
         this.content = content;
         this.member = member;
-        this.category = category;
+        this.mainCategory = mainCategory;
+        this.subCategory = subCategory;
         this.viewCount = 0;
         this.likeCount = 0;
         this.isActive = true;
@@ -75,11 +82,13 @@ public class Post extends BaseTimeEntity {
     public void update(
         final String title, 
         final String content, 
-        final Category category
+        final MainCategory mainCategory,
+        final SubCategory subCategory
     ) {
         this.title = title;
         this.content = content;
-        this.category = category;
+        this.mainCategory = mainCategory;
+        this.subCategory = subCategory;
     }
 
     public boolean isWriter(Member member) {

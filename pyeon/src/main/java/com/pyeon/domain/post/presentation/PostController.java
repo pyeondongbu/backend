@@ -1,10 +1,12 @@
 package com.pyeon.domain.post.presentation;
 
 import com.pyeon.domain.auth.domain.UserPrincipal;
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
+import com.pyeon.domain.post.dto.response.PostSummaryResponse;
 import com.pyeon.domain.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,13 +47,14 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PostResponse>> getPosts(
-            @RequestParam(required = false) Category category,
+    public ResponseEntity<Page<PostSummaryResponse>> getPosts(
+            @RequestParam(required = false) MainCategory mainCategory,
+            @RequestParam(required = false) SubCategory subCategory,
             @RequestParam(required = false) String searchText,
             @RequestParam(defaultValue = "false") boolean onlyPopular,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(postService.getPosts(category, searchText, onlyPopular, pageable));
+        return ResponseEntity.ok(postService.getPostsSummary(mainCategory, subCategory, searchText, onlyPopular, pageable));
     }
 
     @PutMapping("/{postId}")
@@ -87,19 +90,19 @@ public class PostController {
     
     @GetMapping("/my")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Page<PostResponse>> getMyPosts(
+    public ResponseEntity<Page<PostSummaryResponse>> getMyPosts(
             @AuthenticationPrincipal UserPrincipal principal,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(postService.getPostsByMemberId(principal.getId(), pageable));
+        return ResponseEntity.ok(postService.getPostsSummaryByMemberId(principal.getId(), pageable));
     }
 
     @GetMapping("/members/{memberId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Page<PostResponse>> getMemberPosts(
+    public ResponseEntity<Page<PostSummaryResponse>> getMemberPosts(
             @PathVariable Long memberId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(postService.getPostsByMemberId(memberId, pageable));
+        return ResponseEntity.ok(postService.getPostsSummaryByMemberId(memberId, pageable));
     }
 }

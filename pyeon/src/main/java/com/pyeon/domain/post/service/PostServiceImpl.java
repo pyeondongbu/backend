@@ -3,11 +3,13 @@ package com.pyeon.domain.post.service;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.post.dao.PostRepository;
-import com.pyeon.domain.post.domain.Category;
+import com.pyeon.domain.post.domain.enums.MainCategory;
+import com.pyeon.domain.post.domain.enums.SubCategory;
 import com.pyeon.domain.post.domain.Post;
 import com.pyeon.domain.post.dto.request.PostCreateRequest;
 import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
+import com.pyeon.domain.post.dto.response.PostSummaryResponse;
 import com.pyeon.global.exception.CustomException;
 import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import static com.pyeon.domain.post.dao.PostSpecification.isPopular;
-import static com.pyeon.domain.post.dao.PostSpecification.withCategory;
+import static com.pyeon.domain.post.dao.PostSpecification.withMainCategory;
+import static com.pyeon.domain.post.dao.PostSpecification.withSubCategory;
 import static com.pyeon.domain.post.dao.PostSpecification.containsText;
 
 @Service
@@ -40,7 +43,8 @@ public class PostServiceImpl implements PostService {
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
-                .category(request.getCategory())
+                .mainCategory(request.getMainCategory())
+                .subCategory(request.getSubCategory())
                 .member(member)
                 .build();
         return postRepository.save(post).getId();
@@ -64,15 +68,20 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(
-            Category category, 
+            MainCategory mainCategory, 
+            SubCategory subCategory,
             String searchText,
             boolean onlyPopular, 
             Pageable pageable
     ) {
         Specification<Post> spec = Specification.where(null);
         
-        if (category != null) {
-            spec = spec.and(withCategory(category));
+        if (mainCategory != null) {
+            spec = spec.and(withMainCategory(mainCategory));
+        }
+        
+        if (subCategory != null) {
+            spec = spec.and(withSubCategory(subCategory));
         }
         
         if (StringUtils.hasText(searchText)) {
@@ -94,7 +103,8 @@ public class PostServiceImpl implements PostService {
         post.update(
                 request.getTitle(),
                 request.getContent(),
-                request.getCategory()
+                request.getMainCategory(),
+                request.getSubCategory()
         );
     }
 
@@ -147,6 +157,49 @@ public class PostServiceImpl implements PostService {
         
         return postRepository.findAll(spec, pageable)
                 .map(PostResponse::from);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostSummaryResponse> getPostsSummary(
+            MainCategory mainCategory, 
+            SubCategory subCategory,
+            String searchText,
+            boolean onlyPopular, 
+            Pageable pageable
+    ) {
+        Specification<Post> spec = Specification.where(null);
+        
+        if (mainCategory != null) {
+            spec = spec.and(withMainCategory(mainCategory));
+        }
+        
+        if (subCategory != null) {
+            spec = spec.and(withSubCategory(subCategory));
+        }
+        
+        if (StringUtils.hasText(searchText)) {
+            spec = spec.and(containsText(searchText));
+        }
+        
+        if (onlyPopular) {
+            spec = spec.and(isPopular());
+        }
+                
+        return postRepository.findAll(spec, pageable)
+                .map(PostSummaryResponse::from);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PostSummaryResponse> getPostsSummaryByMemberId(Long memberId, Pageable pageable) {
+        Member member = findMemberById(memberId);
+        Specification<Post> spec = Specification.where((root, query, builder) ->
+            builder.equal(root.get("member"), member)
+        );
+        
+        return postRepository.findAll(spec, pageable)
+                .map(PostSummaryResponse::from);
     }
 
     /**
