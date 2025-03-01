@@ -48,10 +48,10 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<Page<PostSummaryResponse>> getPosts(
-            @RequestParam(required = false) MainCategory mainCategory,
-            @RequestParam(required = false) SubCategory subCategory,
-            @RequestParam(required = false) String searchText,
-            @RequestParam(defaultValue = "false") boolean onlyPopular,
+            @RequestParam(name = "mainCategory", required = false) MainCategory mainCategory,
+            @RequestParam(name = "subCategory", required = false) SubCategory subCategory,
+            @RequestParam(name = "searchText", required = false) String searchText,
+            @RequestParam(name = "onlyPopular", defaultValue = "false") boolean onlyPopular,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(postService.getPostsSummary(mainCategory, subCategory, searchText, onlyPopular, pageable));
@@ -100,7 +100,7 @@ public class PostController {
     @GetMapping("/members/{memberId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<PostSummaryResponse>> getMemberPosts(
-            @PathVariable Long memberId,
+            @PathVariable(name = "memberId") Long memberId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(postService.getPostsSummaryByMemberId(memberId, pageable));
