@@ -3,7 +3,7 @@ package com.pyeon.domain.post.domain;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.post.domain.enums.MainCategory;
 import com.pyeon.domain.post.domain.enums.SubCategory;
-import com.pyeon.global.entity.BaseTimeEntity;
+import com.pyeon.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

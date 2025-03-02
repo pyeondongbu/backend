@@ -1,7 +1,7 @@
 package com.pyeon.domain.post.domain;
 
 import com.pyeon.domain.member.domain.Member;
-import com.pyeon.global.entity.BaseTimeEntity;
+import com.pyeon.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,7 +16,6 @@ import org.hibernate.annotations.Where;
 @Where(clause = "is_active = true")
 @SQLDelete(sql = "UPDATE comment SET is_active = false WHERE id = ?")
 public class Comment extends BaseTimeEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,22 +24,18 @@ public class Comment extends BaseTimeEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @Column(nullable = false)
     private boolean isActive;
 
     @Builder
-    public Comment(
-            String content,
-            Member member,
-            Post post
-    ) {
+    public Comment(String content, Member member, Post post) {
         this.content = content;
         this.member = member;
         this.post = post;
@@ -51,8 +46,8 @@ public class Comment extends BaseTimeEntity {
         this.content = content;
     }
 
-    public boolean isAuthor(String email) {
-        return member.getEmail().equals(email);
+    public boolean isWriter(Member member) {
+        return this.member.getId().equals(member.getId());
     }
 
     public void delete() {

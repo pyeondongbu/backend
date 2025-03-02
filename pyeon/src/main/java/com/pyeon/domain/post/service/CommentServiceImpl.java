@@ -40,8 +40,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void updateComment(Long commentId, CommentCreateRequest request, Long memberId) {
         Comment comment = findCommentById(commentId);
+        Member member = findMemberById(memberId);
         
-        if (!comment.isAuthor(findMemberById(memberId).getEmail())) {
+        if (!comment.isWriter(member)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
         
@@ -54,13 +55,16 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findCommentById(commentId);
         Member member = findMemberById(memberId);
         
-        if (!comment.isAuthor(member.getEmail()) && !member.isAdmin()) {
+        if (!comment.isWriter(member)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
         
-        comment.delete();
+        commentRepository.delete(comment);
     }
 
+    /**
+     * Private 함수들
+     */
     private Comment findCommentById(Long id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
