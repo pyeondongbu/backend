@@ -8,6 +8,8 @@ import com.pyeon.domain.post.dto.request.PostUpdateRequest;
 import com.pyeon.domain.post.dto.response.PostResponse;
 import com.pyeon.domain.post.dto.response.PostSummaryResponse;
 import com.pyeon.domain.post.service.PostService;
+import com.pyeon.global.exception.CustomException;
+import com.pyeon.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -58,9 +61,9 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
+    @PreAuthorize("@postAuthChecker.canModify(#id, principal)")
     public ResponseEntity<Void> updatePost(
-            @PathVariable(name = "postId") Long postId,
+            @PathVariable(name = "postId") @P("id") Long postId,
             @RequestBody @Valid PostUpdateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
@@ -69,9 +72,9 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("@postAuthChecker.canModify(#postId, principal)")
+    @PreAuthorize("@postAuthChecker.canModify(#id, principal)")
     public ResponseEntity<Void> deletePost(
-            @PathVariable(name = "postId") Long postId,
+            @PathVariable(name = "postId") @P("id") Long postId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         postService.deletePost(postId, principal.getId());
@@ -87,7 +90,7 @@ public class PostController {
         postService.likePost(postId, principal.getId());
         return ResponseEntity.ok().build();
     }
-    
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Page<PostSummaryResponse>> getMyPosts(

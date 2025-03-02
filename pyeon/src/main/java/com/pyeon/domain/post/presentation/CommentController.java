@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,7 +19,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @postAuthChecker.canWrite(principal)")
     public ResponseEntity<Long> createComment(
             @PathVariable(name = "postId") Long postId,
             @RequestBody @Valid CommentCreateRequest request,
@@ -29,10 +30,10 @@ public class CommentController {
     }
 
     @PutMapping("/{commentId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @commentAuthChecker.canModify(#id, principal)")
     public ResponseEntity<Void> updateComment(
             @PathVariable(name = "postId") Long postId,
-            @PathVariable(name = "commentId") Long commentId,
+            @PathVariable(name = "commentId") @P("id") Long commentId,
             @RequestBody @Valid CommentCreateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
@@ -41,10 +42,10 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @commentAuthChecker.canModify(#id, principal)")
     public ResponseEntity<Void> deleteComment(
             @PathVariable(name = "postId") Long postId,
-            @PathVariable(name = "commentId") Long commentId,
+            @PathVariable(name = "commentId") @P("id") Long commentId,
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         commentService.deleteComment(commentId, principal.getId());

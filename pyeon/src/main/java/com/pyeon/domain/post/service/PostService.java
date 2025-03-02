@@ -39,4 +39,11 @@ public interface PostService {
     void deletePost(Long postId, Long memberId);
     
     void likePost(Long postId, Long memberId);
+
+    /**
+     * 게시글 조회수를 증가시킵니다.
+     * 
+     * @param postId 조회수를 증가시킬 게시글 ID
+     */
+    void incrementViewCount(Long postId);
 }

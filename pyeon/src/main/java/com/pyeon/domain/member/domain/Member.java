@@ -2,7 +2,7 @@ package com.pyeon.domain.member.domain;
 
 import com.pyeon.domain.auth.domain.Authority;
 import com.pyeon.domain.post.domain.Post;
-import com.pyeon.global.entity.BaseTimeEntity;
+import com.pyeon.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
