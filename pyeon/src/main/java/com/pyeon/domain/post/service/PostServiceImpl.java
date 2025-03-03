@@ -1,7 +1,7 @@
 package com.pyeon.domain.post.service;
 
-import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
+import com.pyeon.domain.member.facade.MemberFacade;
 import com.pyeon.domain.post.dao.PostRepository;
 import com.pyeon.domain.post.domain.enums.MainCategory;
 import com.pyeon.domain.post.domain.enums.SubCategory;
@@ -31,7 +31,7 @@ import static com.pyeon.domain.post.dao.PostSpecification.containsText;
 @Transactional(readOnly = true)
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
+    private final MemberFacade memberFacade;
     private final StringRedisTemplate redisTemplate;
 
     private static final String LIKE_KEY_PREFIX = "post:like:";
@@ -39,7 +39,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Long createPost(PostCreateRequest request, Long memberId) {
-        Member member = findMemberById(memberId);
+        Member member = memberFacade.getMemberById(memberId);
         Post post = Post.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -150,7 +150,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostResponse> getPostsByMemberId(Long memberId, Pageable pageable) {
-        Member member = findMemberById(memberId);
+        Member member = memberFacade.getMemberById(memberId);
         Specification<Post> spec = Specification.where((root, query, builder) ->
             builder.equal(root.get("member"), member)
         );
@@ -193,7 +193,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Page<PostSummaryResponse> getPostsSummaryByMemberId(Long memberId, Pageable pageable) {
-        Member member = findMemberById(memberId);
+        Member member = memberFacade.getMemberById(memberId);
         Specification<Post> spec = Specification.where((root, query, builder) ->
             builder.equal(root.get("member"), member)
         );
@@ -227,10 +227,5 @@ public class PostServiceImpl implements PostService {
     private Post findPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-    }
-
-    private Member findMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

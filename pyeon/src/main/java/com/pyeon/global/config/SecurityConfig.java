@@ -53,12 +53,20 @@ public class SecurityConfig {
                             "/oauth2/**",
                             "/api/images/**"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/posts").permitAll()
                         .requestMatchers("/api/posts/{postId}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/api/posts/*/comments/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/posts/*/comments/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/*/comments/**").hasRole("USER")
+                        .requestMatchers("/api/members/me").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/members/{memberId}").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/api/members/me").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/members/me").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

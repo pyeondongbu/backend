@@ -34,7 +34,7 @@ public class MemberController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("@memberAuthChecker.isOwner(#principal.id, principal)")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> updateMyInfo(
             @RequestBody @Valid MemberUpdateRequest request,
             @AuthenticationPrincipal UserPrincipal principal
@@ -44,7 +44,7 @@ public class MemberController {
     }
 
     @DeleteMapping("/me")
-    @PreAuthorize("@memberAuthChecker.isOwner(#principal.id, principal)")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteMyAccount(
             @AuthenticationPrincipal UserPrincipal principal
     ) {
