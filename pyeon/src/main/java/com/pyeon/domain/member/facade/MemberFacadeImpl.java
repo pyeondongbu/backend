@@ -22,6 +22,12 @@ public class MemberFacadeImpl implements MemberFacade {
     }
     
     @Override
+    public Member getMemberByIdIncludeInactive(Long id) {
+        return memberRepository.findByIdIncludeInactive(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+    
+    @Override
     public boolean isMemberExists(Long id) {
         return memberRepository.existsById(id);
     }

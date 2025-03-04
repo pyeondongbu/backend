@@ -17,6 +17,15 @@ public interface MemberFacade {
     Member getMemberById(Long id);
     
     /**
+     * ID로 회원을 조회합니다. (비활성화된 회원 포함)
+     * 
+     * @param id 회원 ID
+     * @return 조회된 회원 엔티티
+     * @throws com.pyeon.global.exception.CustomException 회원이 존재하지 않을 경우
+     */
+    Member getMemberByIdIncludeInactive(Long id);
+    
+    /**
      * 회원의 존재 여부를 확인합니다.
      * 
      * @param id 회원 ID
