@@ -28,7 +28,7 @@ public class MemberController {
     @GetMapping("/{memberId}")
     @PreAuthorize("@memberAuthChecker.canAccess(#memberId, principal)")
     public ResponseEntity<MemberResponse> getMember(
-            @PathVariable Long memberId
+            @PathVariable(name = "memberId") Long memberId
     ) {
         return ResponseEntity.ok(memberService.getMember(memberId));
     }

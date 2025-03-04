@@ -21,16 +21,31 @@ public class AdminMemberController {
     public ResponseEntity<Page<MemberResponse>> getAllMembers(Pageable pageable) {
         return ResponseEntity.ok(adminMemberService.getAllMembers(pageable));
     }
+    
+    @GetMapping("/inactive")
+    public ResponseEntity<Page<MemberResponse>> getInactiveMembers(Pageable pageable) {
+        return ResponseEntity.ok(adminMemberService.getInactiveMembers(pageable));
+    }
 
     @PostMapping("/{memberId}/deactivate")
-    public ResponseEntity<Void> deactivateMember(@PathVariable Long memberId) {
+    public ResponseEntity<Void> deactivateMember(
+            @PathVariable(name = "memberId") Long memberId
+    ) {
         adminMemberService.deactivateMember(memberId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{memberId}/activate")
-    public ResponseEntity<Void> activateMember(@PathVariable Long memberId) {
+    public ResponseEntity<Void> activateMember(
+            @PathVariable(name = "memberId") Long memberId
+    ) {
         adminMemberService.activateMember(memberId);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PostMapping("/{memberId}/promote-to-admin")
+    public ResponseEntity<Void> promoteToAdmin(@PathVariable Long memberId) {
+        adminMemberService.promoteToAdmin(memberId);
         return ResponseEntity.ok().build();
     }
 } 
