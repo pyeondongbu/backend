@@ -27,4 +27,11 @@ public class AuthService {
             jwtProvider.createAccessToken((UserPrincipal) oauth2User)
         );
     }
+    
+    @Transactional
+    public TokenResponse createToken(UserPrincipal userPrincipal) {
+        return new TokenResponse(
+            jwtProvider.createAccessToken(userPrincipal)
+        );
+    }
 }

@@ -1,9 +1,3 @@
 spring:
   profiles:
-    active: prod
-  datasource:
-    hikari:
-      connection-timeout: 30000
-      maximum-pool-size: 10
-      minimum-idle: 5
-      initialization-fail-timeout: 60000
+    active: dev

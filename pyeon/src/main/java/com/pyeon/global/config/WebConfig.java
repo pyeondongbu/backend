@@ -19,7 +19,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(corsOrigin)  // 환경 변수에서 가져온 프론트엔드 주소
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true)  // 쿠키 전송 허용
+                .exposedHeaders("Authorization")  // Authorization 헤더 노출
+                .allowCredentials(false)  // 쿠키 전송 불필요
                 .maxAge(3600);  // preflight 캐시 시간 (1시간)
     }
     

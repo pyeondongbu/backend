@@ -10,12 +10,11 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import org.springframework.web.util.UriComponentsBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.time.Duration;
+import java.net.URI;
 
 @Slf4j
 @Component
@@ -25,12 +24,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     
     @Value("${app.oauth2.authorized-redirect-uri}")
     private String redirectUri;
-    
-    @Value("${app.cookie.secure}")
-    private boolean secureCookie;
-    
-    @Value("${app.cookie.domain}")
-    private String cookieDomain;
 
     @Override
     public void onAuthenticationSuccess(
@@ -41,17 +34,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         TokenResponse tokenResponse = authService.createToken(oauth2User);
 
-        ResponseCookie cookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(secureCookie) // 환경 변수에 따라 설정
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(Duration.ofHours(1))
-                .domain(cookieDomain)
-                .build();
-        
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        // 토큰을 URL 파라미터로 추가하여 리다이렉트
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+                .queryParam("token", tokenResponse.getAccessToken())
+                .build().toUriString();
 
-        getRedirectStrategy().sendRedirect(request, response, redirectUri);
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 } 
