@@ -21,11 +21,6 @@ public class AdminMemberController {
     public ResponseEntity<Page<MemberResponse>> getAllMembers(Pageable pageable) {
         return ResponseEntity.ok(adminMemberService.getAllMembers(pageable));
     }
-    
-    @GetMapping("/inactive")
-    public ResponseEntity<Page<MemberResponse>> getInactiveMembers(Pageable pageable) {
-        return ResponseEntity.ok(adminMemberService.getInactiveMembers(pageable));
-    }
 
     @PostMapping("/{memberId}/deactivate")
     public ResponseEntity<Void> deactivateMember(
