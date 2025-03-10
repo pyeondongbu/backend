@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization")  // Authorization 헤더 노출
-                .allowCredentials(false)  // 쿠키 전송 불필요
+                .allowCredentials(false)  // 쿠키 및 인증 정보 전송 허용
                 .maxAge(3600);  // preflight 캐시 시간 (1시간)
     }
     
