@@ -3,7 +3,7 @@ package com.pyeon.global.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,12 +28,11 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.INVALID_REQUEST, e.getBindingResult()));
     }
 
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
-        log.warn("인증 실패: {}", e.getMessage());
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationDeniedException(AccessDeniedException e) {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse.from(ErrorCode.UNAUTHORIZED));
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.from(ErrorCode.ACCESS_DENIED));
     }
 
     @ExceptionHandler(Exception.class)
