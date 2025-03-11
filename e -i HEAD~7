@@ -1,0 +1,233 @@
+[33mcommit edc1af64c83d542cab2fa39c57ce65733a525a08[m[33m ([m[1;36mHEAD -> [m[1;32mfeat/cicd[m[33m, [m[1;31morigin/feat/cicd[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:55:56 2025 +0900
+
+    fix: db 연결
+
+[33mcommit ba67dd36abe9473e1f05152872c98b139b034b74[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:53:19 2025 +0900
+
+    fix: 컴파일 에러 수정
+
+[33mcommit 9ef29d054426516753478c6f3a834c696ab0411e[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:48:13 2025 +0900
+
+    fix: 경로 관련 수정
+
+[33mcommit 4acbaafbb8956372317da789f62210282bbec20e[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:46:16 2025 +0900
+
+    fix: Build with Gradle 부분 잠재적인 문제 발생할 부분 수정
+
+[33mcommit 457fb19b2f7cfaf1185d76ee4479dbc71b2ab482[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:39:18 2025 +0900
+
+    fix: test용 yml 추가
+
+[33mcommit c5e447f77fc6ecbb2e90f1a34f03879b110fdecc[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:35:28 2025 +0900
+
+    fix: 외부 서비스 의존하는 테스트 삭제
+
+[33mcommit be533dcaf3892feae3707916e4aa7cf3c0524c8f[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Mar 12 00:26:08 2025 +0900
+
+    fix: Gradle Wrapper 설정파일 경로 명시적으로 수정
+
+[33mcommit a8f3c12c8508cf8c86bcb59452e6e2e981ee6919[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Mar 11 20:16:14 2025 +0900
+
+    fix: deprecated 처리된 버전 업데이트
+
+[33mcommit 4bf1b05b62872ecc35b875ed83f08af05e450f85[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Mar 11 20:10:50 2025 +0900
+
+    feat: CI/CD 파이프라인 및 무중단 배포 설정 추가
+
+[33mcommit a6225a656b26563eb95a90671e0d0f0175d82662[m[33m ([m[1;31morigin/refactor/#1-image[m[33m, [m[1;32mrefactor/#1-image[m[33m, [m[1;32mdevelop[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Mar 11 18:49:35 2025 +0900
+
+    refact: Presigned URL으로 Image 영역 수정
+
+[33mcommit 11ecbc4fd3161f8d0d0f98fe5fdc9484b763bc3f[m[33m ([m[1;31morigin/refactor/#5-auth[m[33m, [m[1;32mrefactor/#5-auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Mon Mar 10 10:47:36 2025 +0900
+
+    fix: CORS 문제 해결
+
+[33mcommit 83ced9cab8011554a3203053c1806fc8705b436f[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Mon Mar 10 10:00:42 2025 +0900
+
+    fix: 로컬 테스트 완료
+
+[33mcommit 23139c61641fd9533428cf4f29a558eb307006c7[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 9 17:38:56 2025 +0900
+
+    refact: 인증방식 수정
+
+[33mcommit be920a8288d6a88fcc095af3ad631af0aac06911[m[33m ([m[1;32mrefactor/#1-admin[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 9 15:21:38 2025 +0900
+
+    fix: 배포 관련 수정
+
+[33mcommit 8125afce138f6474bac3f26ef7b4d2814d18a95f[m[33m ([m[1;31morigin/refactor/#1-admin[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Mar 4 10:31:30 2025 +0900
+
+    refact: 어드민 기능 권한 추가
+
+[33mcommit 8db50a98d0f2a3ba212712c427d30283030b32c5[m[33m ([m[1;31morigin/refactor/#1-pattern[m[33m, [m[1;32mrefactor/#1-pattern[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Mar 4 05:20:22 2025 +0900
+
+    refact: 퍼사드 패턴 도입을 통한 결합도 감소 적용
+
+[33mcommit f8f4088340d9be66e7b693121a33987ace082afa[m[33m ([m[1;31morigin/refactor/#1-comment[m[33m, [m[1;32mrefactor/#1-comment[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Mon Mar 3 04:42:35 2025 +0900
+
+    refact: comment 코드 컨벤션 일관화 작업 및 검증 로직 수정
+
+[33mcommit 55b42a468c1973fea37d25454076808aacfc3719[m[33m ([m[1;32mfeat/api[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 2 08:13:10 2025 +0900
+
+    feat: 로컬 프론트와 API 연결 및 파라미터 참조방식 수정
+
+[33mcommit ff5c060be9cbfd202250ce75e879afc2214969b8[m[33m ([m[1;31morigin/refactor/#2-post[m[33m, [m[1;32mrefactor/#2-post[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 2 04:13:24 2025 +0900
+
+    fix: 파라미터 문제 수정
+
+[33mcommit e7f80acfbd0541794f767195f46ff1c8c81ea933[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 2 04:08:15 2025 +0900
+
+    refact: post 요구사항 변경에 따른 수정
+
+[33mcommit a575b4cd26636730acb7d008a2e333ae152a927d[m[33m ([m[1;31morigin/feat/image[m[33m, [m[1;32mfeat/image[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Mar 2 03:20:02 2025 +0900
+
+    feat: 이미지 업로드 기능 추가
+
+[33mcommit f412d34ca615f0305d9e860f2785b34a88f07776[m[33m ([m[1;31morigin/feat/admin[m[33m, [m[1;32mfeat/admin[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Mar 1 03:49:51 2025 +0900
+
+    fix: 어드민 권한 단순화 및 멤버 요구사항 재정립
+
+[33mcommit e5ccc3b2b4c401f0177415ac6e768ac75a82c7ce[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Mar 1 03:32:55 2025 +0900
+
+    feat: 어드민 기능 및 권한 체커 구현
+
+[33mcommit 3bfa3a82d6b437854d47ca5871cc576b8d2870fa[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Mar 1 03:32:33 2025 +0900
+
+    feat: 어드민 기능 및 권한 체커 구현
+
+[33mcommit bf8870610e723ebeade03032cc5811e6d30c90d4[m[33m ([m[1;31morigin/refactor/#1-like[m[33m, [m[1;32mrefactor/#1-like[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Mar 1 02:48:38 2025 +0900
+
+    refact: 좋아요 기능 및 Redis 설정 수정
+
+[33mcommit d98f5e1aed04e335ea59e4c90ff3f20074b4760a[m[33m ([m[1;31morigin/refactor/#1-post[m[33m, [m[1;32mrefactor/#1-post[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Thu Feb 27 03:12:50 2025 +0900
+
+    멤버 CRUD 구현
+
+[33mcommit 90685d2535097e10987c1a9baf5f9920e85ea0eb[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Feb 26 04:55:10 2025 +0900
+
+    검색 기능 추가 및 Comment CRUD 추가
+
+[33mcommit 13cda06303c39fa46b8fccf2d3f025816fc3fc73[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Wed Feb 26 04:36:12 2025 +0900
+
+    comment 및 post 요구사항에 맞게 변경 및 코드 수정
+
+[33mcommit 7f52f7175b3e6409ed185c46ed0f6ee563d19a6e[m[33m ([m[1;31morigin/refactor/#4-auth[m[33m, [m[1;32mrefactor/#4-auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Feb 25 02:08:08 2025 +0900
+
+    refact: Auth 관련 리팩토링
+
+[33mcommit d528777c3b808aa61273121582a44325fbc2abef[m[33m ([m[1;32mrefactor/#3-auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Tue Feb 11 23:05:55 2025 +0900
+
+    refactor: Secure 설정 수정 및 리다이렉트 엔드포인트 수정
+
+[33mcommit bdb4b3cf507cf105f7a3638df8f4168e3cbd59c3[m[33m ([m[1;31morigin/refactor/#2-auth[m[33m, [m[1;32mrefactor/#2-auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Fri Feb 7 17:36:54 2025 +0900
+
+    로그인 기능 전체적인 수정
+
+[33mcommit 2c36ae6baf3f2f2acb007d21a6ef8696c5fea533[m[33m ([m[1;31morigin/feat/post[m[33m, [m[1;32mfeat/post[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Mon Jan 27 02:07:00 2025 +0900
+
+    Post domain, service, dto, presentation 개발
+
+[33mcommit 5cae3babdb58ca3b5a1324e17421720b7f0fa712[m[33m ([m[1;32mrefactor/#1-auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Jan 26 02:47:04 2025 +0900
+
+    SecurityConfig 설정 수정
+
+[33mcommit 988696e48bf8afef42d69b7faca3dcabe96233de[m[33m ([m[1;31morigin/feat/auth[m[33m, [m[1;32mfeat/auth[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Jan 26 02:35:37 2025 +0900
+
+    auth 관련 domain, config, filter, handler, service 등 추가
+
+[33mcommit fd76dea019b5e9eb8be8ebf654a07d9cb66add79[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sun Jan 26 02:12:29 2025 +0900
+
+    ApiResponse 및 ErrorCode 클래스 추가
+
+[33mcommit 9a8d0f942577f76be2791a4915d3ea3f62c9d690[m[33m ([m[1;31morigin/develop[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Jan 25 02:11:27 2025 +0900
+
+    pr 테스트 용
+
+[33mcommit 4974d2aec47b5b8815bfa51dd468d57046134092[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Wonmin <cwh73090@naver.com>
+Date:   Sat Jan 25 02:10:29 2025 +0900
+
+    Create README.md
+
+[33mcommit 9d8a2c7253756cb0a9f2df9c7f2ccc9102e8715a[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Jan 25 01:58:33 2025 +0900
+
+    init
+
+[33mcommit b6656b375d0f5527afe8db4d1f3e9270d0c55919[m[33m ([m[1;31morigin/feature/initial-setting[m[33m, [m[1;32mfeature/initial-setting[m[33m)[m
+Author: ChisaeHwang <cwh73090@naver.com>
+Date:   Sat Jan 25 01:57:00 2025 +0900
+
+    init commit
