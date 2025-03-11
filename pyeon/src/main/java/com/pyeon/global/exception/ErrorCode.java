@@ -58,7 +58,9 @@ public enum ErrorCode {
     FAIL_IMAGE_NAME_HASH(HttpStatus.INTERNAL_SERVER_ERROR, "IMG_005", "이미지 이름 해싱에 실패했습니다."),
     EMPTY_IMAGE_LIST(HttpStatus.BAD_REQUEST, "IMG_006", "이미지 목록이 비어있습니다."),
     EXCEED_IMAGE_LIST_SIZE(HttpStatus.BAD_REQUEST, "IMG_007", "이미지 목록 크기를 초과했습니다."),
-    EXCEED_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "IMG_008", "이미지 크기가 5MB를 초과했습니다.");
+    EXCEED_IMAGE_SIZE(HttpStatus.BAD_REQUEST, "IMG_008", "이미지 크기가 5MB를 초과했습니다."),
+    IMAGE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "IMG_009", "이미지 삭제에 실패했습니다."),
+    IMAGE_URL_PARSE_FAILED(HttpStatus.BAD_REQUEST, "IMG_010", "이미지 URL 파싱에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

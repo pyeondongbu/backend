@@ -1,5 +1,6 @@
 package com.pyeon.domain.post.service;
 
+import com.pyeon.domain.image.service.ImageService;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.member.facade.MemberFacade;
 import com.pyeon.domain.post.dao.PostRepository;
@@ -13,6 +14,7 @@ import com.pyeon.domain.post.dto.response.PostSummaryResponse;
 import com.pyeon.global.exception.CustomException;
 import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,6 +28,10 @@ import static com.pyeon.domain.post.dao.PostSpecification.withMainCategory;
 import static com.pyeon.domain.post.dao.PostSpecification.withSubCategory;
 import static com.pyeon.domain.post.dao.PostSpecification.containsText;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final MemberFacade memberFacade;
     private final StringRedisTemplate redisTemplate;
+    private final ImageService imageService;
 
     private static final String LIKE_KEY_PREFIX = "post:like:";
 
@@ -117,8 +124,10 @@ public class PostServiceImpl implements PostService {
             String key = LIKE_KEY_PREFIX + postId;
             redisTemplate.delete(key);
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED);
+            throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED, "게시글 좋아요 정보 삭제 실패: " + e.getMessage());
         }
+        
+        deleteImagesInContent(post.getContent());
         
         postRepository.delete(post);
     }
@@ -227,5 +236,32 @@ public class PostServiceImpl implements PostService {
     private Post findPostById(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    private void deleteImagesInContent(String content) {
+        Pattern pattern = Pattern.compile("https://[^\\s\"']+\\.amazonaws\\.com/[^\\s\"']+");
+        Matcher matcher = pattern.matcher(content);
+        
+        while (matcher.find()) {
+            String imageUrl = matcher.group();
+            String fileName = extractFileNameFromUrl(imageUrl);
+            if (fileName != null) {
+                try {
+                    imageService.deleteImage(fileName);
+                } catch (Exception e) {
+                    log.warn("이미지 삭제 실패: {}", fileName, e);
+                }
+            }
+        }
+    }
+
+    private String extractFileNameFromUrl(String url) {
+        try {
+            String[] parts = url.split("/");
+            return parts[parts.length - 1];
+        } catch (Exception e) {
+            log.warn("이미지 URL 파싱 실패: {}", url, e);
+            return null;
+        }
     }
 }

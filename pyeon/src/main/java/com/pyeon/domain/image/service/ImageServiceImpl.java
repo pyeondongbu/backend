@@ -1,51 +1,29 @@
 package com.pyeon.domain.image.service;
 
-import com.pyeon.domain.image.domain.ImageFile;
 import com.pyeon.domain.image.domain.S3ImageEvent;
-import com.pyeon.domain.image.dto.response.ImageRes;
-import com.pyeon.domain.image.infra.ImageUploader;
-import com.pyeon.global.exception.ImageException;
+import com.pyeon.domain.image.dto.response.PreSignedUrlRes;
+import com.pyeon.global.config.S3Config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import static com.pyeon.global.exception.ErrorCode.EMPTY_IMAGE;
-import static com.pyeon.global.exception.ErrorCode.EXCEED_IMAGE_SIZE;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-    private final ImageUploader imageUploader;
+    private final S3Config s3Config;
     private final ApplicationEventPublisher publisher;
 
     @Override
-    public ImageRes save(final MultipartFile image) {
-        validateImage(image);
-        final ImageFile imageFile = new ImageFile(image);
-        final String imageUrl = uploadImage(imageFile);
-        return new ImageRes(imageUrl);
+    public PreSignedUrlRes generatePresignedUrl(String contentType) {
+        String fileName = UUID.randomUUID().toString();
+        String preSignedUrl = s3Config.generatePresignedUrl(fileName, contentType);
+        return new PreSignedUrlRes(preSignedUrl, fileName);
     }
 
-    private String uploadImage(final ImageFile imageFile) {
-        try {
-            return imageUploader.uploadImage(imageFile);
-        } catch (final ImageException e) {
-            publisher.publishEvent(new S3ImageEvent(imageFile.getHashedName()));
-            throw e;
-        }
-    }
-
-    private void validateImage(final MultipartFile image) {
-        if (image == null || image.isEmpty()) {
-            throw new ImageException(EMPTY_IMAGE);
-        }
-        
-        if (image.getSize() > MAX_FILE_SIZE) {
-            throw new ImageException(EXCEED_IMAGE_SIZE);
-        }
+    public void deleteImage(String fileName) {
+        publisher.publishEvent(new S3ImageEvent(fileName));
     }
 } 
