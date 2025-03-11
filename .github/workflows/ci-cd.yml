@@ -61,19 +61,27 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 8.5
+          gradle-home-cache-cleanup: true
+          cache-read-only: false
+
+      - name: Change to project directory
+        run: cd pyeon
+
+      - name: Generate Gradle Wrapper
+        working-directory: ./pyeon
+        run: gradle wrapper
 
       - name: Grant execute permission for gradlew
-        run: chmod +x ./pyeon/gradlew
+        working-directory: ./pyeon
+        run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: |
-          cd pyeon
-          ./gradlew clean build --stacktrace -Pspring.profiles.active=test
+        working-directory: ./pyeon
+        run: ./gradlew clean build --stacktrace -Pspring.profiles.active=test
 
       - name: Run tests
-        run: |
-          cd pyeon
-          ./gradlew test --stacktrace -Pspring.profiles.active=test
+        working-directory: ./pyeon
+        run: ./gradlew test --stacktrace -Pspring.profiles.active=test
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
