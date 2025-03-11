@@ -1,6 +1,8 @@
 spring:
   profiles:
-    active: prod
+    default: dev
+  config:
+    import: optional:file:.env[.properties]
 ---
 spring:
   config:
@@ -17,5 +19,5 @@ spring:
       on-profile: prod
   servlet:
     multipart:
-      max-file-size: 10MB # 운영환경은 조금 더 제한적으로
+      max-file-size: 10MB
       max-request-size: 10MB
