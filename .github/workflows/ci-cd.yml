@@ -120,12 +120,41 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Copy deployment files to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          source: "pyeon/deploy-blue-green.sh,pyeon/docker-compose.prod.yml,pyeon/docker-compose.blue.yml,pyeon/docker-compose.green.yml,pyeon/nginx.conf"
+          target: "/tmp"
+          strip_components: 1
+
+      - name: Move files to app directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          debug: true
+          script: |
+            mkdir -p /app
+            cp /tmp/deploy-blue-green.sh /tmp/docker-compose.prod.yml /tmp/docker-compose.blue.yml /tmp/docker-compose.green.yml /tmp/nginx.conf /app/
+            chmod +x /app/deploy-blue-green.sh
+
       - name: Create .env file on server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
             cd /app
             cat > .env << 'EOL'
@@ -176,6 +205,8 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
             cd /app
             chmod +x ./deploy-blue-green.sh
@@ -187,6 +218,8 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
             # 배포 후 서비스 상태 확인
             HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" https://api.pyeondongbu.com/actuator/health || echo "000")
