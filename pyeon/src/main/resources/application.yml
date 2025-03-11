@@ -1,6 +1,23 @@
 spring:
   profiles:
     active: prod
+
+# Actuator 공통 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
 ---
 spring:
   config:
