@@ -51,7 +51,9 @@ public class SecurityConfig {
                             "/favicon.ico",
                             "/api/auth/**",
                             "/oauth2/**",
-                            "/api/images/**"
+                            "/api/images/**",
+                            "/actuator/health",
+                            "/actuator/info"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
