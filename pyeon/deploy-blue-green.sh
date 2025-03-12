@@ -11,6 +11,14 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
+# 기존 단일 배포 컨테이너 확인 및 중지
+OLD_APP_CONTAINER=$(docker ps --filter "name=app-app-1" --format "{{.Names}}" | grep -q "app-app-1" && echo "yes" || echo "no")
+if [ "$OLD_APP_CONTAINER" == "yes" ]; then
+  echo "기존 단일 배포 컨테이너(app-app-1)가 실행 중입니다. 중지합니다."
+  docker stop app-app-1
+  docker rm app-app-1
+fi
+
 # 현재 실행 중인 컨테이너 확인 (blue 또는 green)
 CURRENT_CONTAINER=$(docker ps --filter "name=app-" --format "{{.Names}}" | grep -E 'app-blue|app-green' || echo "NONE")
 
@@ -34,7 +42,15 @@ docker pull chisae/pyeondongbu-app:latest
 # 기존 컨테이너가 없는 경우 DB와 Redis 컨테이너 먼저 시작
 if [ "$CURRENT_CONTAINER" == "NONE" ]; then
   echo "DB와 Redis 컨테이너 시작 중..."
-  docker-compose -f docker-compose.prod.yml up -d db redis
+  # 이미 실행 중인 DB와 Redis 컨테이너가 있는지 확인
+  DB_RUNNING=$(docker ps --filter "name=app-db-1" --format "{{.Names}}" | grep -q "app-db-1" && echo "yes" || echo "no")
+  REDIS_RUNNING=$(docker ps --filter "name=app-redis-1" --format "{{.Names}}" | grep -q "app-redis-1" && echo "yes" || echo "no")
+  
+  if [ "$DB_RUNNING" == "no" ] || [ "$REDIS_RUNNING" == "no" ]; then
+    docker-compose -f docker-compose.prod.yml up -d db redis
+  else
+    echo "DB와 Redis 컨테이너가 이미 실행 중입니다."
+  fi
   
   # DB와 Redis가 준비될 때까지 대기
   echo "DB와 Redis 준비 대기 중..."
@@ -75,15 +91,15 @@ done
 # Nginx 설정 업데이트 (트래픽 전환)
 echo "Nginx 설정 업데이트 중..."
 if [ "$TARGET_COLOR" == "blue" ]; then
-  sed -i 's/app-green/app-blue/g' nginx.conf
+  sed -i 's/app-green/app-blue/g' /app/nginx.conf
 else
-  sed -i 's/app-blue/app-green/g' nginx.conf
+  sed -i 's/app-blue/app-green/g' /app/nginx.conf
 fi
 
 # Nginx 시작 또는 재시작
-if docker ps | grep -q nginx; then
+if docker ps | grep -q app-nginx-1; then
   echo "Nginx 재시작 중..."
-  docker-compose -f docker-compose.prod.yml restart nginx
+  docker restart app-nginx-1
 else
   echo "Nginx 시작 중..."
   docker-compose -f docker-compose.prod.yml up -d nginx
