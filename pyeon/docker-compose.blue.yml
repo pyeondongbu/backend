@@ -9,44 +9,101 @@ services:
     ports:
       - "8081:8080"
     environment:
+      # Spring 프로필 설정
       - SPRING_PROFILES_ACTIVE=prod
+
+      # 데이터베이스 설정
+      - SPRING_DATASOURCE_URL=jdbc:mysql://app-db-1:3306/pyeon?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=${PROD_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${PROD_DB_PASSWORD}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
       - PROD_DB_HOST=app-db-1
       - PROD_DB_PORT=3306
       - PROD_DB_NAME=pyeon
       - PROD_DB_USERNAME=${PROD_DB_USERNAME}
       - PROD_DB_PASSWORD=${PROD_DB_PASSWORD}
-      - SPRING_DATASOURCE_URL=jdbc:mysql://app-db-1:3306/pyeon?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=${PROD_DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${PROD_DB_PASSWORD}
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+
+      # Redis 설정
       - SPRING_DATA_REDIS_HOST=app-redis-1
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_DATA_REDIS_PASSWORD=${PROD_REDIS_PASSWORD}
       - PROD_REDIS_HOST=app-redis-1
       - PROD_REDIS_PORT=6379
       - PROD_REDIS_PASSWORD=${PROD_REDIS_PASSWORD}
-      - PROD_SERVER_PORT=8080
+
+      # JWT 설정
       - PROD_JWT_SECRET=${PROD_JWT_SECRET_KEY}
+      - jwt.secret-key=${PROD_JWT_SECRET_KEY}
+      - jwt.access-token-validity=259200000
+      - jwt.refresh-token-validity=604800000
+
+      # 서버 설정
+      - PROD_SERVER_PORT=8080
+      - server.port=8080
+
+      # 도메인 설정
+      - PROD_DOMAIN=api.pyeondongbu.com
+      - PROD_FRONTEND_URL=${PROD_FRONTEND_URL}
+      - app.cookie.domain=api.pyeondongbu.com
+
+      # CORS 설정
+      - PROD_CORS_ORIGIN=${PROD_CORS_ORIGIN}
+      - cors.origin=${PROD_CORS_ORIGIN}
+
+      # OAuth 설정
       - PROD_GOOGLE_CLIENT_ID=${PROD_GOOGLE_CLIENT_ID}
       - PROD_GOOGLE_CLIENT_SECRET=${PROD_GOOGLE_CLIENT_SECRET}
       - PROD_GOOGLE_REDIRECT_URI=${PROD_GOOGLE_REDIRECT_URI}
+      - app.oauth2.authorized-redirect-uri=${PROD_GOOGLE_REDIRECT_URI}
+      - spring.security.oauth2.client.registration.google.client-id=${PROD_GOOGLE_CLIENT_ID}
+      - spring.security.oauth2.client.registration.google.client-secret=${PROD_GOOGLE_CLIENT_SECRET}
+
+      # AWS 설정
       - PROD_AWS_ACCESS_KEY=${PROD_AWS_ACCESS_KEY}
       - PROD_AWS_SECRET_KEY=${PROD_AWS_SECRET_KEY}
       - PROD_AWS_REGION=${PROD_AWS_REGION}
       - PROD_S3_BUCKET=${PROD_S3_BUCKET}
       - PROD_S3_FOLDER=${PROD_S3_FOLDER}
-      - PROD_CORS_ORIGIN=${PROD_CORS_ORIGIN}
-      - PROD_DOMAIN=api.pyeondongbu.com
-      - PROD_FRONTEND_URL=${PROD_FRONTEND_URL}
+      - cloud.aws.credentials.access-key=${PROD_AWS_ACCESS_KEY}
+      - cloud.aws.credentials.secret-key=${PROD_AWS_SECRET_KEY}
+      - cloud.aws.region.static=${PROD_AWS_REGION}
+      - cloud.aws.s3.bucket=${PROD_S3_BUCKET}
+      - cloud.aws.s3.folder=${PROD_S3_FOLDER}
+
+      # 로깅 설정
+      - logging.level.root=INFO
+      - logging.level.com.pyeon=INFO
+      - logging.level.org.springframework.security=DEBUG
+      - logging.file.name=/var/log/pyeon/application.log
     restart: always
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 30s
+    volumes:
+      - /var/log/pyeon:/var/log/pyeon
 
 networks:
   app-network:
