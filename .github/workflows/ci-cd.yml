@@ -159,7 +159,7 @@ jobs:
             cd /app
             cat > .env << 'EOL'
             # Database
-            PROD_DB_HOST=db
+            PROD_DB_HOST=app-db-1
             PROD_DB_PORT=3306
             PROD_DB_NAME=pyeon
             PROD_DB_USERNAME=${{ secrets.PROD_DB_USERNAME }}
@@ -171,7 +171,7 @@ jobs:
             PROD_GOOGLE_REDIRECT_URI=${{ secrets.PROD_GOOGLE_REDIRECT_URI }}
 
             # Redis
-            PROD_REDIS_HOST=redis
+            PROD_REDIS_HOST=app-redis-1
             PROD_REDIS_PORT=6379
             PROD_REDIS_PASSWORD=${{ secrets.PROD_REDIS_PASSWORD }}
 
@@ -241,7 +241,7 @@ jobs:
             fi
 
             # 3. Nginx 상태 확인
-            NGINX_STATUS=$(docker ps --filter "name=app-nginx" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
+            NGINX_STATUS=$(docker ps --filter "name=app-nginx-1" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
             if [ "$NGINX_STATUS" == "none" ]; then
               echo "Nginx가 실행 중이지 않습니다."
             else
