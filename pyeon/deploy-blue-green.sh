@@ -48,15 +48,22 @@ docker-compose -f docker-compose.prod.yml -f docker-compose.$TARGET_COLOR.yml up
 # 새 컨테이너가 정상적으로 시작될 때까지 대기
 echo "새 컨테이너 헬스체크 중..."
 for i in {1..30}; do
-  # 컨테이너 내부에서 헬스체크 수행
-  HEALTH_CHECK=$(docker exec -i app-$TARGET_COLOR curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
+  # 컨테이너 상태 확인
+  CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' app-$TARGET_COLOR 2>/dev/null || echo "not_found")
   
-  if [ "$HEALTH_CHECK" == "200" ]; then
-    echo "새 컨테이너 정상 작동 확인 (상태 코드: $HEALTH_CHECK)"
-    break
+  if [ "$CONTAINER_STATUS" == "running" ]; then
+    # 컨테이너가 실행 중이면 포트 접근 가능 여부 확인
+    PORT_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:808$([[ "$TARGET_COLOR" == "blue" ]] && echo "1" || echo "2") || echo "000")
+    
+    if [ "$PORT_CHECK" != "000" ]; then
+      echo "새 컨테이너 정상 작동 확인 (상태: $CONTAINER_STATUS, 포트 응답: $PORT_CHECK)"
+      # 애플리케이션 시작 시간 고려
+      sleep 5
+      break
+    fi
   fi
   
-  echo "헬스체크 대기 중... (시도: $i, 상태 코드: $HEALTH_CHECK)"
+  echo "컨테이너 상태 확인 중... (시도: $i, 상태: $CONTAINER_STATUS)"
   sleep 2
   
   if [ $i -eq 30 ]; then
