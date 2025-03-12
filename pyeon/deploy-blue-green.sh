@@ -48,7 +48,8 @@ docker-compose -f docker-compose.prod.yml -f docker-compose.$TARGET_COLOR.yml up
 # 새 컨테이너가 정상적으로 시작될 때까지 대기
 echo "새 컨테이너 헬스체크 중..."
 for i in {1..30}; do
-  HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:808$([[ "$TARGET_COLOR" == "blue" ]] && echo "1" || echo "2")/actuator/health || echo "000")
+  # 컨테이너 내부에서 헬스체크 수행
+  HEALTH_CHECK=$(docker exec -i app-$TARGET_COLOR curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo "000")
   
   if [ "$HEALTH_CHECK" == "200" ]; then
     echo "새 컨테이너 정상 작동 확인 (상태 코드: $HEALTH_CHECK)"
