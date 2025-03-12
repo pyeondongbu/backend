@@ -226,7 +226,7 @@ jobs:
             echo "서비스 상태 확인 중..."
 
             # 1. 컨테이너 상태 확인
-            CONTAINER_STATUS=$(docker ps --filter "name=app-" --format "{{.State.Status}}" | grep -E 'running' || echo "none")
+            CONTAINER_STATUS=$(docker ps --filter "name=app-app" --filter "name=app-blue" --filter "name=app-green" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
             if [ "$CONTAINER_STATUS" == "none" ]; then
               echo "실행 중인 애플리케이션 컨테이너가 없습니다."
               exit 1
@@ -241,7 +241,7 @@ jobs:
             fi
 
             # 3. Nginx 상태 확인
-            NGINX_STATUS=$(docker ps --filter "name=nginx" --format "{{.State.Status}}" | grep -E 'running' || echo "none")
+            NGINX_STATUS=$(docker ps --filter "name=app-nginx" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
             if [ "$NGINX_STATUS" == "none" ]; then
               echo "Nginx가 실행 중이지 않습니다."
             else
