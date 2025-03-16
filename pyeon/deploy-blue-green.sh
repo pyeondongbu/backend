@@ -149,6 +149,18 @@ else
   docker-compose -f docker-compose.prod.yml up -d nginx
 fi
 
+# 모니터링 서비스 시작 또는 재시작
+echo "모니터링 서비스 확인 중..."
+PROMETHEUS_RUNNING=$(docker ps --filter "name=app-prometheus-1" --format "{{.Names}}" | grep -q "app-prometheus-1" && echo "yes" || echo "no")
+GRAFANA_RUNNING=$(docker ps --filter "name=app-grafana-1" --format "{{.Names}}" | grep -q "app-grafana-1" && echo "yes" || echo "no")
+
+if [ "$PROMETHEUS_RUNNING" == "no" ] || [ "$GRAFANA_RUNNING" == "no" ]; then
+  echo "모니터링 서비스 시작 중..."
+  docker-compose -f docker-compose.prod.yml up -d prometheus grafana
+else
+  echo "모니터링 서비스가 이미 실행 중입니다."
+fi
+
 # Nginx 재시작 후 상태 확인
 NGINX_STATUS=$(docker inspect --format='{{.State.Status}}' app-nginx-1 2>/dev/null || echo "not_found")
 if [ "$NGINX_STATUS" != "running" ]; then
