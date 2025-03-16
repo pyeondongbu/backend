@@ -11,6 +11,15 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
+# 네트워크 존재 여부 확인 및 생성
+NETWORK_EXISTS=$(docker network ls | grep app_app-network || echo "")
+if [ -z "$NETWORK_EXISTS" ]; then
+  echo "app_app-network 네트워크가 존재하지 않습니다. 생성합니다."
+  docker network create app_app-network
+else
+  echo "app_app-network 네트워크가 이미 존재합니다."
+fi
+
 # 기존 단일 배포 컨테이너 확인 및 중지
 OLD_APP_CONTAINER=$(docker ps --filter "name=app-app-1" --format "{{.Names}}" | grep -q "app-app-1" && echo "yes" || echo "no")
 if [ "$OLD_APP_CONTAINER" == "yes" ]; then
@@ -34,6 +43,12 @@ fi
 
 echo "현재 운영 중인 컨테이너: $CURRENT_CONTAINER"
 echo "배포 대상 컨테이너: app-$TARGET_COLOR"
+
+# 배포 전 상태 저장 (롤백을 위해)
+if [ "$CURRENT_CONTAINER" != "NONE" ]; then
+  echo "롤백을 위해 현재 상태 저장"
+  CURRENT_NGINX_CONF=$(cat /app/nginx.conf)
+fi
 
 # 최신 이미지 가져오기
 echo "최신 이미지 가져오는 중..."
@@ -63,6 +78,7 @@ docker-compose -f docker-compose.prod.yml -f docker-compose.$TARGET_COLOR.yml up
 
 # 새 컨테이너가 정상적으로 시작될 때까지 대기
 echo "새 컨테이너 헬스체크 중..."
+HEALTH_CHECK_PASSED=false
 for i in {1..30}; do
   # 컨테이너 상태 확인
   CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' app-$TARGET_COLOR 2>/dev/null || echo "not_found")
@@ -75,6 +91,7 @@ for i in {1..30}; do
       echo "새 컨테이너 정상 작동 확인 (상태: $CONTAINER_STATUS, 포트 응답: $PORT_CHECK)"
       # 애플리케이션 시작 시간 고려
       sleep 5
+      HEALTH_CHECK_PASSED=true
       break
     fi
   fi
@@ -83,10 +100,37 @@ for i in {1..30}; do
   sleep 2
   
   if [ $i -eq 30 ]; then
-    echo "새 컨테이너 시작 실패. 배포 중단."
+    echo "새 컨테이너 시작 실패. 배포 중단 및 롤백 시작."
+    # 롤백 로직 - 새 컨테이너 중지
+    docker stop app-$TARGET_COLOR
+    docker rm app-$TARGET_COLOR
+    
+    if [ "$CURRENT_CONTAINER" != "NONE" ]; then
+      echo "이전 상태로 롤백합니다."
+      # 이전 컨테이너가 있었다면 계속 사용
+      echo "롤백 완료. 이전 컨테이너($CURRENT_CONTAINER)를 계속 사용합니다."
+    fi
+    
+    echo "===== 배포 실패, 롤백 완료 ====="
     exit 1
   fi
 done
+
+# 헬스체크 실패 시 롤백
+if [ "$HEALTH_CHECK_PASSED" != "true" ]; then
+  echo "헬스체크 실패. 롤백을 시작합니다."
+  docker stop app-$TARGET_COLOR
+  docker rm app-$TARGET_COLOR
+  
+  if [ "$CURRENT_CONTAINER" != "NONE" ]; then
+    echo "이전 상태로 롤백합니다."
+    # 이전 컨테이너가 있었다면 계속 사용
+    echo "롤백 완료. 이전 컨테이너($CURRENT_CONTAINER)를 계속 사용합니다."
+  fi
+  
+  echo "===== 배포 실패, 롤백 완료 ====="
+  exit 1
+fi
 
 # Nginx 설정 업데이트 (트래픽 전환)
 echo "Nginx 설정 업데이트 중..."
@@ -103,6 +147,38 @@ if docker ps | grep -q app-nginx-1; then
 else
   echo "Nginx 시작 중..."
   docker-compose -f docker-compose.prod.yml up -d nginx
+fi
+
+# 모니터링 서비스 시작 또는 재시작
+echo "모니터링 서비스 확인 중..."
+PROMETHEUS_RUNNING=$(docker ps --filter "name=app-prometheus-1" --format "{{.Names}}" | grep -q "app-prometheus-1" && echo "yes" || echo "no")
+GRAFANA_RUNNING=$(docker ps --filter "name=app-grafana-1" --format "{{.Names}}" | grep -q "app-grafana-1" && echo "yes" || echo "no")
+
+if [ "$PROMETHEUS_RUNNING" == "no" ] || [ "$GRAFANA_RUNNING" == "no" ]; then
+  echo "모니터링 서비스 시작 중..."
+  docker-compose -f docker-compose.prod.yml up -d prometheus grafana
+else
+  echo "모니터링 서비스가 이미 실행 중입니다."
+fi
+
+# Nginx 재시작 후 상태 확인
+NGINX_STATUS=$(docker inspect --format='{{.State.Status}}' app-nginx-1 2>/dev/null || echo "not_found")
+if [ "$NGINX_STATUS" != "running" ]; then
+  echo "Nginx 재시작 실패. 롤백을 시작합니다."
+  
+  # Nginx 설정 롤백
+  if [ "$CURRENT_CONTAINER" != "NONE" ]; then
+    echo "$CURRENT_NGINX_CONF" > /app/nginx.conf
+    docker-compose -f docker-compose.prod.yml up -d nginx
+  fi
+  
+  # 새 컨테이너 중지
+  docker stop app-$TARGET_COLOR
+  docker rm app-$TARGET_COLOR
+  
+  echo "롤백 완료. 이전 컨테이너($CURRENT_CONTAINER)를 계속 사용합니다."
+  echo "===== 배포 실패, 롤백 완료 ====="
+  exit 1
 fi
 
 echo "트래픽이 app-$TARGET_COLOR로 전환되었습니다."
@@ -130,6 +206,7 @@ if [ "$FINAL_CHECK" == "200" ]; then
   echo "서비스가 정상적으로 배포되었습니다. (상태 코드: $FINAL_CHECK)"
 else
   echo "주의: 서비스 상태 확인 실패 (상태 코드: $FINAL_CHECK)"
+  echo "하지만 컨테이너는 정상 실행 중입니다. 모니터링이 필요합니다."
 fi
 
 echo "배포 스크립트 실행 완료" 

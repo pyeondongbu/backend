@@ -130,7 +130,7 @@ jobs:
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
-          source: "pyeon/deploy-blue-green.sh,pyeon/docker-compose.prod.yml,pyeon/docker-compose.blue.yml,pyeon/docker-compose.green.yml,pyeon/nginx.conf"
+          source: "pyeon/deploy-blue-green.sh,pyeon/docker-compose.prod.yml,pyeon/docker-compose.blue.yml,pyeon/docker-compose.green.yml,pyeon/nginx.conf,pyeon/prometheus.yml"
           target: "/tmp"
           strip_components: 1
 
@@ -144,8 +144,13 @@ jobs:
           debug: true
           script: |
             mkdir -p /app
-            cp /tmp/deploy-blue-green.sh /tmp/docker-compose.prod.yml /tmp/docker-compose.blue.yml /tmp/docker-compose.green.yml /tmp/nginx.conf /app/
+            cp /tmp/deploy-blue-green.sh /tmp/docker-compose.prod.yml /tmp/docker-compose.blue.yml /tmp/docker-compose.green.yml /tmp/nginx.conf /tmp/prometheus.yml /app/
             chmod +x /app/deploy-blue-green.sh
+
+            # Prometheus 접근 제한을 위한 .htpasswd 파일 생성
+            apt-get update && apt-get install -y apache2-utils
+            mkdir -p /etc/nginx
+            htpasswd -bc /etc/nginx/.htpasswd.prometheus admin ${{ secrets.PROMETHEUS_PASSWORD || 'admin123' }}
 
       - name: Create .env file on server
         uses: appleboy/ssh-action@master
@@ -196,6 +201,9 @@ jobs:
             # Domain
             PROD_DOMAIN=api.pyeondongbu.com
             PROD_FRONTEND_URL=${{ secrets.PROD_FRONTEND_URL }}
+
+            # Grafana
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
             EOL
             chmod 600 .env
 
@@ -260,18 +268,3 @@ jobs:
               echo "서비스 배포 실패"
               exit 1
             fi
-
-      - name: Notify deployment result
-        if: always()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: deployments
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_TITLE: 배포 결과
-          SLACK_MESSAGE: |
-            환경: Production
-            상태: ${{ job.status }}
-            커밋: ${{ github.event.head_commit.message }}
-            작성자: ${{ github.event.head_commit.author.name }}
-            시간: ${{ github.event.head_commit.timestamp }}
