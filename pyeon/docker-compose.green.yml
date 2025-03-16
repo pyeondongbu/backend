@@ -54,9 +54,11 @@ services:
       - PROD_GOOGLE_CLIENT_ID=${PROD_GOOGLE_CLIENT_ID}
       - PROD_GOOGLE_CLIENT_SECRET=${PROD_GOOGLE_CLIENT_SECRET}
       - PROD_GOOGLE_REDIRECT_URI=${PROD_GOOGLE_REDIRECT_URI}
-      - app.oauth2.authorized-redirect-uri=${PROD_GOOGLE_REDIRECT_URI}
+      - PROD_FRONTEND_CALLBACK_URI=${PROD_FRONTEND_URL}/auth/callback
+      - app.oauth2.authorized-redirect-uri=${PROD_FRONTEND_CALLBACK_URI}
       - spring.security.oauth2.client.registration.google.client-id=${PROD_GOOGLE_CLIENT_ID}
       - spring.security.oauth2.client.registration.google.client-secret=${PROD_GOOGLE_CLIENT_SECRET}
+      - spring.security.oauth2.client.registration.google.redirect-uri=${PROD_GOOGLE_REDIRECT_URI}
 
       # AWS 설정
       - PROD_AWS_ACCESS_KEY=${PROD_AWS_ACCESS_KEY}
