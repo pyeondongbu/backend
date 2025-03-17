@@ -56,7 +56,8 @@ public class SecurityConfig {
                             "/actuator/info",
                             "/actuator/prometheus",
                             "/prometheus/**",
-                            "/grafana/**"
+                            "/grafana/**",
+                            "/login"
                         ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

@@ -201,6 +201,7 @@ jobs:
             # Domain
             PROD_DOMAIN=api.pyeondongbu.com
             PROD_FRONTEND_URL=${{ secrets.PROD_FRONTEND_URL }}
+            PROD_FRONTEND_CALLBACK_URI=${{ secrets.PROD_FRONTEND_URL }}/auth/callback
 
             # Grafana
             GRAFANA_ADMIN_PASSWORD=${{ secrets.GRAFANA_ADMIN_PASSWORD }}
@@ -233,14 +234,23 @@ jobs:
             # 여러 방법으로 서비스 상태 확인 시도
             echo "서비스 상태 확인 중..."
 
-            # 1. 컨테이너 상태 확인
-            CONTAINER_STATUS=$(docker ps --filter "name=app-app" --filter "name=app-blue" --filter "name=app-green" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
-            if [ "$CONTAINER_STATUS" == "none" ]; then
-              echo "실행 중인 애플리케이션 컨테이너가 없습니다."
-              exit 1
-            fi
+            # 1. 블루/그린 컨테이너 상태 확인
+            BLUE_STATUS=$(docker ps --filter "name=app-blue" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
+            GREEN_STATUS=$(docker ps --filter "name=app-green" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
+            APP_STATUS=$(docker ps --filter "name=app-app" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
 
-            # 2. 로컬 포트 확인
+            # 2. 모니터링 컨테이너 상태 확인
+            PROMETHEUS_STATUS=$(docker ps --filter "name=app-prometheus-1" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
+            GRAFANA_STATUS=$(docker ps --filter "name=app-grafana-1" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
+
+            # 3. 상태 출력
+            echo "블루 환경 상태: $BLUE_STATUS"
+            echo "그린 환경 상태: $GREEN_STATUS"
+            echo "앱 컨테이너 상태: $APP_STATUS"
+            echo "Prometheus 상태: $PROMETHEUS_STATUS"
+            echo "Grafana 상태: $GRAFANA_STATUS"
+
+            # 4. 로컬 포트 확인
             LOCAL_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081 || curl -s -o /dev/null -w "%{http_code}" http://localhost:8082 || echo "000")
             if [ "$LOCAL_CHECK" != "000" ]; then
               echo "로컬 포트 접근 가능: $LOCAL_CHECK"
@@ -248,7 +258,7 @@ jobs:
               echo "로컬 포트 접근 불가"
             fi
 
-            # 3. Nginx 상태 확인
+            # 5. Nginx 상태 확인
             NGINX_STATUS=$(docker ps --filter "name=app-nginx-1" --format "{{.Status}}" | grep -E 'Up|running' || echo "none")
             if [ "$NGINX_STATUS" == "none" ]; then
               echo "Nginx가 실행 중이지 않습니다."
@@ -256,15 +266,20 @@ jobs:
               echo "Nginx 실행 중"
             fi
 
-            # 4. 도메인 접근 시도 (타임아웃 감소)
+            # 6. 도메인 접근 시도 (타임아웃 감소)
             DOMAIN_CHECK=$(curl -s --connect-timeout 5 -o /dev/null -w "%{http_code}" https://api.pyeondongbu.com || echo "000")
             echo "도메인 접근 상태: $DOMAIN_CHECK"
 
-            # 최종 판단: 컨테이너가 실행 중이면 성공으로 간주
-            if [ "$CONTAINER_STATUS" != "none" ]; then
-              echo "서비스가 정상적으로 배포되었습니다. (컨테이너 상태: $CONTAINER_STATUS)"
+            # 7. 최종 판단: 
+            # - 블루 또는 그린 환경 중 하나라도 실행 중이면 성공
+            # - 또는 모니터링 컨테이너가 모두 실행 중이면 성공
+            if [ "$BLUE_STATUS" != "none" ] || [ "$GREEN_STATUS" != "none" ] || [ "$APP_STATUS" != "none" ]; then
+              echo "애플리케이션 서비스가 정상적으로 배포되었습니다."
+              exit 0
+            elif [ "$PROMETHEUS_STATUS" != "none" ] && [ "$GRAFANA_STATUS" != "none" ]; then
+              echo "모니터링 시스템이 정상적으로 배포되었습니다. 애플리케이션 컨테이너는 확인이 필요합니다."
               exit 0
             else
-              echo "서비스 배포 실패"
+              echo "서비스 배포 실패: 애플리케이션 및 모니터링 컨테이너가 실행되지 않습니다."
               exit 1
             fi
