@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>편동부 API 서버</title>
+    <style>
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #333;
+      }
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+      }
+      h1 {
+        color: #4a6ee0;
+        margin-bottom: 1rem;
+      }
+      p {
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+      .status {
+        display: inline-block;
+        background-color: #4caf50;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .links {
+        margin-top: 2rem;
+      }
+      .links a {
+        display: inline-block;
+        margin: 0 0.5rem;
+        color: #4a6ee0;
+        text-decoration: none;
+      }
+      .links a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>편동부 API 서버</h1>
+      <p>편동부 백엔드 API 서버가 정상적으로 실행 중입니다.</p>
+      <div class="status">서비스 상태: 정상</div>
+      <div class="links">
+        <a href="/actuator/health">서버 상태 확인</a>
+        <a href="/actuator/prometheus">Prometheus 메트릭</a>
+      </div>
+    </div>
+  </body>
+</html>
