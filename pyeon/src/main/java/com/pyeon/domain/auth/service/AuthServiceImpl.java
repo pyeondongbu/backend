@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
                 return createTokenFromOAuth2User(oauth2User);
             }
         } catch (Exception e) {
+            log.error("토큰 생성 중 오류 발생", e);
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
@@ -58,7 +59,12 @@ public class AuthServiceImpl implements AuthService {
     public TokenResponse createToken(UserPrincipal userPrincipal) {
         return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
     }
-    
+
+
+    /**
+     * Private 함수들
+     */
+
     /**
      * UserPrincipal 객체로부터 토큰을 생성합니다.
      * 
@@ -79,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
     private TokenResponse createTokenFromOAuth2User(OAuth2User oauth2User) {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
-        Member member = findMemberByEmail(email);
+        Member member = findOrCreateMember(email, attributes);
         UserPrincipal userPrincipal = createUserPrincipal(member);
         
         return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
@@ -101,15 +107,36 @@ public class AuthServiceImpl implements AuthService {
     }
     
     /**
-     * 이메일로 회원 정보를 조회합니다.
+     * 이메일로 회원 정보를 조회하고, 없으면 생성합니다.
      * 
      * @param email 이메일
-     * @return 조회된 회원 정보
-     * @throws CustomException 회원이 존재하지 않는 경우 발생
+     * @param attributes OAuth2 사용자 속성
+     * @return 조회되거나 생성된 회원 정보
      */
-    private Member findMemberByEmail(String email) {
+    private Member findOrCreateMember(String email, Map<String, Object> attributes) {
         return memberRepository.findByEmail(email)
-            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseGet(() -> createMember(email, attributes));
+    }
+    
+    /**
+     * 새 회원을 생성합니다.
+     * 
+     * @param email 이메일
+     * @param attributes OAuth2 사용자 속성
+     * @return 생성된 회원 정보
+     */
+    private Member createMember(String email, Map<String, Object> attributes) {
+        String name = (String) attributes.get("name");
+        String picture = (String) attributes.get("picture");
+        String nickname = (name != null) ? name : email.split("@")[0];
+        
+        return memberRepository.save(
+            Member.builder()
+                .email(email)
+                .nickname(nickname)
+                .profileImageUrl(picture)
+                .build()
+        );
     }
     
     /**
