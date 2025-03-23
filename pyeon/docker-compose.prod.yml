@@ -31,7 +31,7 @@ services:
     image: mysql:8.0.26
     container_name: app-db-1
     expose:
-      - "3306"
+      - "3306:3306"
     environment:
       - MYSQL_DATABASE=pyeon
       - MYSQL_ROOT_PASSWORD=${PROD_DB_PASSWORD}
@@ -112,8 +112,10 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
+    command:
+      - "--web.listen-address=127.0.0.1:9090"
+    expose:
+      - "9090"
     restart: always
     networks:
       - app-network
@@ -136,12 +138,15 @@ services:
     container_name: app-grafana-1
     volumes:
       - grafana_data:/var/lib/grafana
-    ports:
-      - "3000:3000"
+    command:
+      - "--serve_from_sub_path=true"
+    expose:
+      - "3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_HTTP_ADDR=127.0.0.1
     restart: always
     networks:
       - app-network
