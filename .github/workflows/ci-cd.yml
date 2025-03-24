@@ -130,7 +130,7 @@ jobs:
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: 22
-          source: "pyeon/deploy-blue-green.sh,pyeon/docker-compose.prod.yml,pyeon/docker-compose.blue.yml,pyeon/docker-compose.green.yml,pyeon/nginx.conf,pyeon/prometheus.yml"
+          source: "pyeon/deploy-blue-green.sh,pyeon/docker-compose.prod.yml,pyeon/docker-compose.blue.yml,pyeon/docker-compose.green.yml,pyeon/nginx.conf,pyeon/prometheus.yml,pyeon/grafana/"
           target: "/tmp"
           strip_components: 1
 
@@ -143,8 +143,11 @@ jobs:
           port: 22
           debug: true
           script: |
-            mkdir -p /app
+            mkdir -p /app/grafana/provisioning/datasources
+            mkdir -p /app/grafana/provisioning/dashboards
+            mkdir -p /app/grafana/dashboards
             cp /tmp/deploy-blue-green.sh /tmp/docker-compose.prod.yml /tmp/docker-compose.blue.yml /tmp/docker-compose.green.yml /tmp/nginx.conf /tmp/prometheus.yml /app/
+            cp -r /tmp/grafana/* /app/grafana/
             chmod +x /app/deploy-blue-green.sh
 
             # Prometheus 접근 제한을 위한 .htpasswd 파일 생성
