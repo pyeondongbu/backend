@@ -166,6 +166,35 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  mysql-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: app-mysql-exporter-1
+    environment:
+      - DATA_SOURCE_NAME=root:${PROD_DB_PASSWORD}@(db:3306)/
+    command:
+      - "--collect.info_schema.tables"
+      - "--collect.info_schema.innodb_metrics"
+    expose:
+      - "9104"
+    networks:
+      - app-network
+    restart: always
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   mysql_data_prod:
   redis_data_prod:
