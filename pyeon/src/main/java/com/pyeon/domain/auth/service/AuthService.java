@@ -13,7 +13,7 @@ public interface AuthService {
     /**
      * OAuth2User 객체로부터 토큰을 생성합니다.
      *
-     * @param oauth2User OAuth2 인증 정보
+     * @param oauth2User OAuth2 인증 정보.
      * @return 생성된 토큰 정보
      */
     TokenResponse createToken(OAuth2User oauth2User);
