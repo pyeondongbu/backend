@@ -1,6 +1,5 @@
 package com.pyeon.domain.auth.service;
 
-import com.pyeon.domain.auth.domain.Authority;
 import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;

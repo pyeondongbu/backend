@@ -15,6 +15,7 @@ import com.pyeon.global.exception.ErrorCode;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 인증 서비스 구현체
@@ -85,9 +86,16 @@ public class AuthServiceImpl implements AuthService {
     private TokenResponse createTokenFromOAuth2User(OAuth2User oauth2User) {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
-        Member member = findOrCreateMember(email, attributes);
-        UserPrincipal userPrincipal = createUserPrincipal(member);
         
+        // 이미 CustomOAuth2UserService에서 사용자 생성/조회가 완료되었으므로
+        // 단순히 이메일로 회원을 조회만 합니다
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.error("OAuth2 인증 완료된 사용자를 찾을 수 없음: {}", email);
+                    return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+                });
+        
+        UserPrincipal userPrincipal = createUserPrincipal(member);
         return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
     }
     
@@ -104,39 +112,6 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.OAUTH2_EMAIL_NOT_FOUND);
         }
         return email;
-    }
-    
-    /**
-     * 이메일로 회원 정보를 조회하고, 없으면 생성합니다.
-     * 
-     * @param email 이메일
-     * @param attributes OAuth2 사용자 속성
-     * @return 조회되거나 생성된 회원 정보
-     */
-    private Member findOrCreateMember(String email, Map<String, Object> attributes) {
-        return memberRepository.findByEmail(email)
-            .orElseGet(() -> createMember(email, attributes));
-    }
-    
-    /**
-     * 새 회원을 생성합니다.
-     * 
-     * @param email 이메일
-     * @param attributes OAuth2 사용자 속성
-     * @return 생성된 회원 정보
-     */
-    private Member createMember(String email, Map<String, Object> attributes) {
-        String name = (String) attributes.get("name");
-        String picture = (String) attributes.get("picture");
-        String nickname = (name != null) ? name : email.split("@")[0];
-        
-        return memberRepository.save(
-            Member.builder()
-                .email(email)
-                .nickname(nickname)
-                .profileImageUrl(picture)
-                .build()
-        );
     }
     
     /**
