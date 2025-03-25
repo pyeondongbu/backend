@@ -20,7 +20,7 @@ public enum ErrorCode {
     MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "MEMBER_004", "일시 정지된 회원입니다."),
     MEMBER_BANNED(HttpStatus.FORBIDDEN, "MEMBER_005", "영구 정지된 회원입니다."),
     ADMIN_NOT_SUSPENDABLE(HttpStatus.FORBIDDEN, "MEMBER_006", "관리자는 제재할 수 없습니다."),
-    MEMBER_DEACTIVATED(HttpStatus.FORBIDDEN, "MEMBER_007", "비활성화된 회원입니다."),
+    MEMBER_DEACTIVATED(HttpStatus.FORBIDDEN, "MEMBER_007", "사용이 제한된 사용자이거나 탈퇴한 사용자입니다."),
 
     // Request 관련 에러
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "REQ_001", "잘못된 요청입니다."),
