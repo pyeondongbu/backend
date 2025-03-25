@@ -86,14 +86,17 @@ public class AuthServiceImpl implements AuthService {
     private TokenResponse createTokenFromOAuth2User(OAuth2User oauth2User) {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
-        
-        // 이미 CustomOAuth2UserService에서 사용자 생성/조회가 완료되었으므로
-        // 단순히 이메일로 회원을 조회만 합니다
-        Member member = memberRepository.findByEmail(email)
+
+        Member member = memberRepository.findByEmailIncludeInactive(email)
                 .orElseThrow(() -> {
                     log.error("OAuth2 인증 완료된 사용자를 찾을 수 없음: {}", email);
                     return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
                 });
+        
+        if (!member.isActive()) {
+            log.warn("비활성화된 계정으로 토큰 생성 시도: {}", email);
+            throw new CustomException(ErrorCode.MEMBER_DEACTIVATED);
+        }
         
         UserPrincipal userPrincipal = createUserPrincipal(member);
         return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
