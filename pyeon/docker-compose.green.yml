@@ -75,7 +75,7 @@ services:
       # 로깅 설정
       - logging.level.root=INFO
       - logging.level.com.pyeon=INFO
-      - logging.level.org.springframework.security=DEBUG
+      - logging.level.org.springframework.security=WARN
       - logging.file.name=/var/log/pyeon/application.log
     restart: always
     networks:
@@ -99,7 +99,22 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test:
+        [
+          "CMD",
+          "java",
+          "-jar",
+          "/tmp/healthcheck.jar",
+          "||",
+          "java",
+          "-cp",
+          "/app/app.jar",
+          "org.springframework.boot.loader.launch.JarLauncher",
+          "--thin.dryrun",
+          "||",
+          "echo",
+          "0",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
