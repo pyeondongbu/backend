@@ -171,7 +171,14 @@ fi
 
 # 새 컨테이너 실행 (대상 컨테이너)
 echo "새 컨테이너(app-$TARGET_COLOR) 시작 중..."
-docker-compose -f docker-compose.prod.yml -f docker-compose.$TARGET_COLOR.yml up -d app-$TARGET_COLOR
+docker-compose -f docker-compose.prod.yml -f docker-compose.$TARGET_COLOR.yml up -d --no-deps app-$TARGET_COLOR
+
+# 의존성 서비스 상태 확인
+REDIS_HEALTH=$(docker ps --filter "name=app-redis-1" --format "{{.Status}}" | grep -E "Up|running" || echo "")
+DB_HEALTH=$(docker ps --filter "name=app-db-1" --format "{{.Status}}" | grep -E "Up|running" || echo "")
+if [ -z "$REDIS_HEALTH" ] || [ -z "$DB_HEALTH" ]; then
+  echo "경고: Redis 또는 DB가 실행 중이 아닙니다. 애플리케이션이 제대로 동작하지 않을 수 있습니다."
+fi
 
 # 새 컨테이너가 정상적으로 실행되는지 확인
 echo "새 컨테이너 상태 확인 중... (최대 30초 대기)"
