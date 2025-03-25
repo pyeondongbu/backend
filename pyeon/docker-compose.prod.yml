@@ -76,37 +76,11 @@ services:
         max-size: "20m"
         max-file: "5"
 
-  mysqld-exporter:
-    image: prom/mysqld-exporter:latest
-    container_name: app-mysqld-exporter-1
-    expose:
-      - "9104"
-    environment:
-      - DATA_SOURCE_NAME=root:${PROD_DB_PASSWORD}@(db:3306)/
-    restart: always
-    networks:
-      - app-network
-    depends_on:
-      - db
-    deploy:
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: 128M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   redis:
     image: redis:7.0
     container_name: app-redis-1
-    expose:
-      - "6379"
+    ports:
+      - "6379:6379"
     command: ["redis-server", "--requirepass", "${PROD_REDIS_PASSWORD}"]
     volumes:
       - redis_data_prod:/data
@@ -139,9 +113,9 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
-      - "--web.listen-address=127.0.0.1:9090"
-    expose:
-      - "9090"
+      - "--web.listen-address=0.0.0.0:9090"
+    ports:
+      - "9090:9090"
     restart: always
     networks:
       - app-network
@@ -164,19 +138,15 @@ services:
     container_name: app-grafana-1
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-    command:
-      - "--serve_from_sub_path=true"
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_HTTP_ADDR=127.0.0.1
-      - GF_SERVER_ROOT_URL=https://api.pyeondongbu.com/grafana
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_HTTP_ADDR=0.0.0.0
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
     restart: always
     networks:
       - app-network
@@ -190,35 +160,6 @@ services:
         reservations:
           cpus: "0.1"
           memory: 128M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  mysql-exporter:
-    image: prom/mysqld-exporter:latest
-    container_name: app-mysql-exporter-1
-    environment:
-      - DATA_SOURCE_NAME=root:${PROD_DB_PASSWORD}@(db:3306)/
-    command:
-      - "--collect.info_schema.tables"
-      - "--collect.info_schema.innodb_metrics"
-    expose:
-      - "9104"
-    networks:
-      - app-network
-    restart: always
-    depends_on:
-      - db
-    deploy:
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: 128M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
     logging:
       driver: "json-file"
       options:

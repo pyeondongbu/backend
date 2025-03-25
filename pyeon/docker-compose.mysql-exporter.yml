@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.12.1
+    container_name: app-mysqld-exporter
+    restart: always
+    environment:
+      - DATA_SOURCE_NAME=exporter:${MYSQL_EXPORTER_PASSWORD}@(app-db-1:3306)/
+    ports:
+      - "9104:9104"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: app_app-network
