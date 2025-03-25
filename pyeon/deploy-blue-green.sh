@@ -216,7 +216,7 @@ server {
     # Prometheus
     location /prometheus/ {
         auth_basic "Prometheus";
-        auth_basic_user_file /app/config/.htpasswd;
+        auth_basic_user_file /etc/nginx/.htpasswd.prometheus;
         proxy_pass http://app-prometheus-1:9090/;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
