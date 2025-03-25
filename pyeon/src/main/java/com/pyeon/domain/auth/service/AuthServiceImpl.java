@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
 
-        Member member = memberRepository.findByEmailIncludeInactive(email)
+        Member member = memberRepository.findByEmailWithNativeSql(email)
                 .orElseThrow(() -> {
                     log.error("OAuth2 인증 완료된 사용자를 찾을 수 없음: {}", email);
                     return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
