@@ -44,8 +44,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private Member findOrCreateMember(Map<String, Object> attributes) {
         String email = (String) attributes.get("email");
-        
-        Optional<Member> memberOpt = memberRepository.findByEmailIncludeInactive(email);
+
+        Optional<Member> memberOpt = memberRepository.findByEmailWithNativeSql(email);
         
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
