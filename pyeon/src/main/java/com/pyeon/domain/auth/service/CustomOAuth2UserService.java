@@ -5,6 +5,8 @@ import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.auth.validator.OAuth2Validator;
+import com.pyeon.global.exception.CustomException;
+import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +45,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private Member findOrCreateMember(Map<String, Object> attributes) {
         String email = (String) attributes.get("email");
-        return memberRepository.findByEmail(email)
-                .orElseGet(() -> createMember(attributes));
+        
+        Optional<Member> memberOpt = memberRepository.findByEmailIncludeInactive(email);
+        
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (!member.isActive()) {
+                throw new CustomException(ErrorCode.MEMBER_DEACTIVATED);
+            }
+            return member;
+        }
+        
+        // 계정이 없으면 새로 생성
+        return createMember(attributes);
     }
 
     private Member createMember(Map<String, Object> attributes) {
