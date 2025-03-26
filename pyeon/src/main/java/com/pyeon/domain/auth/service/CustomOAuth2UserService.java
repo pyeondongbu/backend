@@ -4,6 +4,7 @@ import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
 import com.pyeon.domain.auth.validator.OAuth2Validator;
+import com.pyeon.domain.member.util.NicknameGenerator;
 import com.pyeon.global.exception.CustomException;
 import com.pyeon.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
     private final OAuth2Validator validator;
+    private final NicknameGenerator nicknameGenerator;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -72,7 +74,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private String extractNickname(Map<String, Object> attributes) {
         String name = (String) attributes.get("name");
         String email = (String) attributes.get("email");
-        return (name != null) ? name : email.split("@")[0];
+        String baseName = (name != null) ? name : email.split("@")[0];
+
+
+        return nicknameGenerator.generateUniqueNickname(baseName);
     }
 
     private UserPrincipal createUserPrincipal(Member member) {
