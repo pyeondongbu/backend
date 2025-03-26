@@ -42,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findCommentById(commentId);
         Member member = memberFacade.getMemberById(memberId);
         
-        if (!comment.isWriter(member)) {
+        if (!member.isAdmin() && !comment.isWriter(member)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
         
@@ -55,7 +55,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findCommentById(commentId);
         Member member = memberFacade.getMemberById(memberId);
         
-        if (!comment.isWriter(member)) {
+        if (!member.isAdmin() && !comment.isWriter(member)) {
             throw new CustomException(ErrorCode.NOT_COMMENT_AUTHOR);
         }
         
