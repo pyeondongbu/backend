@@ -44,11 +44,9 @@ public class AuthServiceImpl implements AuthService {
                 return createTokenFromOAuth2User(oauth2User);
             }
         } catch (CustomException e) {
-            // CustomException은 그대로 전달
             log.error("토큰 생성 중 오류 발생", e);
             throw e;
         } catch (Exception e) {
-            // 다른 예외는 INVALID_TOKEN으로 변환
             log.error("토큰 생성 중 예상치 못한 오류 발생", e);
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
@@ -65,7 +63,6 @@ public class AuthServiceImpl implements AuthService {
     public TokenResponse createToken(UserPrincipal userPrincipal) {
         return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
     }
-
 
     /**
      * Private 함수들
@@ -91,20 +88,43 @@ public class AuthServiceImpl implements AuthService {
     private TokenResponse createTokenFromOAuth2User(OAuth2User oauth2User) {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
-
-        Member member = memberRepository.findByEmailWithNativeSql(email)
-                .orElseThrow(() -> {
-                    log.error("OAuth2 인증 완료된 사용자를 찾을 수 없음: {}", email);
-                    return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-                });
         
+        Member member = findOrCreateMember(email, attributes);
+        UserPrincipal userPrincipal = createUserPrincipal(member);
+        
+        return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
+    }
+    
+    /**
+     * 이메일로 회원을 찾거나 생성합니다.
+     */
+    private Member findOrCreateMember(String email, Map<String, Object> attributes) {
+        Optional<Member> memberOpt = memberRepository.findByEmailWithNativeSql(email);
+        
+        if (memberOpt.isPresent()) {
+            return validateAndGetMember(memberOpt.get(), email);
+        } else {
+            return createNewMember(attributes);
+        }
+    }
+    
+    /**
+     * 회원의 활성화 상태를 확인합니다.
+     */
+    private Member validateAndGetMember(Member member, String email) {
         if (!member.isActive()) {
             log.warn("비활성화된 계정으로 토큰 생성 시도: {}", email);
             throw new CustomException(ErrorCode.MEMBER_DEACTIVATED);
         }
-        
-        UserPrincipal userPrincipal = createUserPrincipal(member);
-        return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
+        return member;
+    }
+    
+    /**
+     * 새로운 회원을 생성합니다.
+     */
+    private Member createNewMember(Map<String, Object> attributes) {
+        log.info("새로운 사용자 생성: {}", attributes.get("email"));
+        return createMember(attributes);
     }
     
     /**
@@ -136,5 +156,43 @@ public class AuthServiceImpl implements AuthService {
             .profileImageUrl(member.getProfileImageUrl())
             .authorities(Collections.singleton(member.getAuthority()))
             .build();
+    }
+    
+    /**
+     * OAuth2 속성을 기반으로 새로운 회원을 생성합니다.
+     * 
+     * @param attributes OAuth2 사용자 속성
+     * @return 생성된 회원 정보
+     */
+    private Member createMember(Map<String, Object> attributes) {
+        String email = (String) attributes.get("email");
+        String nickname = extractNickname(attributes);
+        String profileImageUrl = (String) attributes.get("picture");
+        
+        Member member = buildMember(email, nickname, profileImageUrl);
+        return memberRepository.save(member);
+    }
+    
+    /**
+     * Member 엔티티를 생성합니다.
+     */
+    private Member buildMember(String email, String nickname, String profileImageUrl) {
+        return Member.builder()
+            .email(email)
+            .nickname(nickname)
+            .profileImageUrl(profileImageUrl)
+            .build();
+    }
+    
+    /**
+     * OAuth2 속성에서 닉네임을 추출합니다.
+     * 
+     * @param attributes OAuth2 사용자 속성
+     * @return 추출된 닉네임
+     */
+    private String extractNickname(Map<String, Object> attributes) {
+        String name = (String) attributes.get("name");
+        String email = (String) attributes.get("email");
+        return (name != null) ? name : email.split("@")[0];
     }
 } 
