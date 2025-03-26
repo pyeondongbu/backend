@@ -3,8 +3,10 @@ package com.pyeon.domain.auth.service;
 import com.pyeon.domain.auth.domain.UserPrincipal;
 import com.pyeon.domain.auth.dto.response.TokenResponse;
 import com.pyeon.domain.auth.util.JwtProvider;
+import com.pyeon.domain.auth.util.UserPrincipalUtil;
 import com.pyeon.domain.member.dao.MemberRepository;
 import com.pyeon.domain.member.domain.Member;
+import com.pyeon.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,9 +15,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import com.pyeon.global.exception.CustomException;
 import com.pyeon.global.exception.ErrorCode;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 인증 서비스 구현체
@@ -26,20 +26,17 @@ import java.util.Optional;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
     private final JwtProvider jwtProvider;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     /**
      * OAuth2User 객체로부터 토큰을 생성합니다.
-     *
-     * @param oauth2User OAuth2 인증 정보
-     * @return 생성된 토큰 정보
      */
     @Override
     @Transactional
     public TokenResponse createToken(OAuth2User oauth2User) {
         try {
             if (oauth2User instanceof UserPrincipal) {
-                return createTokenFromUserPrincipal((UserPrincipal) oauth2User);
+                return createToken((UserPrincipal) oauth2User);
             } else {
                 return createTokenFromOAuth2User(oauth2User);
             }
@@ -54,9 +51,6 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * UserPrincipal 객체로부터 토큰을 생성합니다.
-     *
-     * @param userPrincipal 사용자 인증 주체 정보
-     * @return 생성된 토큰 정보
      */
     @Override
     @Transactional
@@ -65,74 +59,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * Private 함수들
-     */
-
-    /**
-     * UserPrincipal 객체로부터 토큰을 생성합니다.
-     * 
-     * @param userPrincipal 사용자 인증 주체 정보
-     * @return 생성된 토큰 정보
-     */
-    private TokenResponse createTokenFromUserPrincipal(UserPrincipal userPrincipal) {
-        return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
-    }
-    
-    /**
      * OAuth2User 객체로부터 토큰을 생성합니다.
-     * 사용자 정보를 추출하고 회원 정보를 조회한 후 토큰을 발급합니다.
-     * 
-     * @param oauth2User OAuth2 인증 정보
-     * @return 생성된 토큰 정보
      */
     private TokenResponse createTokenFromOAuth2User(OAuth2User oauth2User) {
         Map<String, Object> attributes = oauth2User.getAttributes();
         String email = extractEmail(attributes);
         
-        Member member = findOrCreateMember(email, attributes);
-        UserPrincipal userPrincipal = createUserPrincipal(member);
+        Member member = memberService.findOrCreateMemberByEmail(email, attributes);
+        UserPrincipal userPrincipal = UserPrincipalUtil.createFromMember(member);
         
-        return new TokenResponse(jwtProvider.createAccessToken(userPrincipal));
-    }
-    
-    /**
-     * 이메일로 회원을 찾거나 생성합니다.
-     */
-    private Member findOrCreateMember(String email, Map<String, Object> attributes) {
-        Optional<Member> memberOpt = memberRepository.findByEmailWithNativeSql(email);
-        
-        if (memberOpt.isPresent()) {
-            return validateAndGetMember(memberOpt.get(), email);
-        } else {
-            return createNewMember(attributes);
-        }
-    }
-    
-    /**
-     * 회원의 활성화 상태를 확인합니다.
-     */
-    private Member validateAndGetMember(Member member, String email) {
-        if (!member.isActive()) {
-            log.warn("비활성화된 계정으로 토큰 생성 시도: {}", email);
-            throw new CustomException(ErrorCode.MEMBER_DEACTIVATED);
-        }
-        return member;
-    }
-    
-    /**
-     * 새로운 회원을 생성합니다.
-     */
-    private Member createNewMember(Map<String, Object> attributes) {
-        log.info("새로운 사용자 생성: {}", attributes.get("email"));
-        return createMember(attributes);
+        return createToken(userPrincipal);
     }
     
     /**
      * OAuth2 속성에서 이메일을 추출합니다.
-     * 
-     * @param attributes OAuth2 사용자 속성
-     * @return 추출된 이메일
-     * @throws CustomException 이메일이 없는 경우 발생
      */
     private String extractEmail(Map<String, Object> attributes) {
         String email = (String) attributes.get("email");
@@ -140,59 +80,5 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.OAUTH2_EMAIL_NOT_FOUND);
         }
         return email;
-    }
-    
-    /**
-     * 회원 정보로부터 UserPrincipal 객체를 생성합니다.
-     * 
-     * @param member 회원 정보
-     * @return 생성된 UserPrincipal 객체
-     */
-    private UserPrincipal createUserPrincipal(Member member) {
-        return UserPrincipal.builder()
-            .id(member.getId())
-            .email(member.getEmail())
-            .nickname(member.getNickname())
-            .profileImageUrl(member.getProfileImageUrl())
-            .authorities(Collections.singleton(member.getAuthority()))
-            .build();
-    }
-    
-    /**
-     * OAuth2 속성을 기반으로 새로운 회원을 생성합니다.
-     * 
-     * @param attributes OAuth2 사용자 속성
-     * @return 생성된 회원 정보
-     */
-    private Member createMember(Map<String, Object> attributes) {
-        String email = (String) attributes.get("email");
-        String nickname = extractNickname(attributes);
-        String profileImageUrl = (String) attributes.get("picture");
-        
-        Member member = buildMember(email, nickname, profileImageUrl);
-        return memberRepository.save(member);
-    }
-    
-    /**
-     * Member 엔티티를 생성합니다.
-     */
-    private Member buildMember(String email, String nickname, String profileImageUrl) {
-        return Member.builder()
-            .email(email)
-            .nickname(nickname)
-            .profileImageUrl(profileImageUrl)
-            .build();
-    }
-    
-    /**
-     * OAuth2 속성에서 닉네임을 추출합니다.
-     * 
-     * @param attributes OAuth2 사용자 속성
-     * @return 추출된 닉네임
-     */
-    private String extractNickname(Map<String, Object> attributes) {
-        String name = (String) attributes.get("name");
-        String email = (String) attributes.get("email");
-        return (name != null) ? name : email.split("@")[0];
     }
 } 

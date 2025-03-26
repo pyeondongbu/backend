@@ -12,6 +12,9 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_002", "유효하지 않은 토큰입니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH_003", "만료된 토큰입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "AUTH_004", "접근 권한이 없습니다."),
+    TOKEN_MALFORMED(HttpStatus.UNAUTHORIZED, "AUTH_005", "잘못된 형식의 토큰입니다."),
+    TOKEN_UNSUPPORTED(HttpStatus.UNAUTHORIZED, "AUTH_006", "지원하지 않는 토큰입니다."),
+    TOKEN_SIGNATURE_INVALID(HttpStatus.UNAUTHORIZED, "AUTH_007", "토큰 서명이 유효하지 않습니다."),
     
     // Member 관련 에러
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_001", "사용자를 찾을 수 없습니다."),

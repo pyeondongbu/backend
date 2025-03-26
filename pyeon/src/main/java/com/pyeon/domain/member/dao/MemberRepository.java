@@ -10,21 +10,30 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+    /**
+     * 활성화된 회원만 이메일로 찾습니다.
+     */
     Optional<Member> findByEmail(String email);
 
+    /**
+     * 이메일 존재 여부를 확인합니다.
+     */
     boolean existsByEmail(String email);
     
+    /**
+     * 닉네임 존재 여부를 확인합니다.
+     */
     boolean existsByNickname(String nickname);
     
-    // isActive 상태와 관계없이 ID로 멤버 찾기
+    /**
+     * 모든 상태의 회원을 ID로 찾습니다.
+     */
     @Query("SELECT m FROM Member m WHERE m.id = :id")
     Optional<Member> findByIdIncludeInactive(@Param("id") Long id);
     
-    // isActive 상태와 관계없이 이메일로 멤버 찾기
+    /**
+     * 모든 상태의 회원을 이메일로 찾습니다.
+     */
     @Query("SELECT m FROM Member m WHERE m.email = :email")
     Optional<Member> findByEmailIncludeInactive(@Param("email") String email);
-    
-    // 네이티브 SQL을 사용하여 모든 상태의 회원을 찾는 메서드
-    @Query(value = "SELECT * FROM member WHERE email = :email", nativeQuery = true)
-    Optional<Member> findByEmailWithNativeSql(@Param("email") String email);
 }
