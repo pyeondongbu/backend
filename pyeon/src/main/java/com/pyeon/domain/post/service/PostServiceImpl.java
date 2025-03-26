@@ -118,18 +118,24 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long postId, Long memberId) {
+        log.info("게시글 삭제 시도: postId={}, memberId={}", postId, memberId);
         Post post = findPostById(postId);
+        log.info("게시글 찾음: postId={}, 작성자={}", postId, post.getMember().getId());
 
         try {
             String key = LIKE_KEY_PREFIX + postId;
             redisTemplate.delete(key);
+            log.info("Redis 좋아요 정보 삭제 성공: key={}", key);
         } catch (Exception e) {
+            log.error("Redis 좋아요 정보 삭제 실패: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILED, "게시글 좋아요 정보 삭제 실패: " + e.getMessage());
         }
         
         deleteImagesInContent(post.getContent());
         
+        log.info("게시글 삭제 실행: postId={}", postId);
         postRepository.delete(post);
+        log.info("게시글 삭제 완료: postId={}", postId);
     }
 
     @Override
