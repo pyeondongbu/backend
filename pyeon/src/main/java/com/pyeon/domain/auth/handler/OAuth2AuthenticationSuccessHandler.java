@@ -3,6 +3,7 @@ package com.pyeon.domain.auth.handler;
 import com.pyeon.domain.auth.dto.response.TokenResponse;
 import com.pyeon.domain.auth.service.AuthService;
 import com.pyeon.global.exception.CustomException;
+import com.pyeon.global.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         try {
             String targetUrl = handleSuccessfulAuthentication(authentication);
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
-        } catch (Exception e) {
+        } catch (CustomException e) {
             handleAuthenticationError(request, response, e);
+        } catch (Exception e) {
+            log.error("인증 처리 중 예상치 못한 오류 발생", e);
+            handleAuthenticationError(request, response, new CustomException(ErrorCode.UNAUTHORIZED));
         }
     }
 
@@ -83,7 +87,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private String buildGenericErrorUrl() {
         return UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("error", "AUTHENTICATION_FAILED")
+                .queryParam("error", "UNAUTHORIZED")
                 .queryParam("message", "Authentication failed")
                 .build().toUriString();
     }
@@ -93,6 +97,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             case "MEMBER_DEACTIVATED" -> "Account is deactivated";
             case "MEMBER_NOT_FOUND" -> "User not found";
             case "INVALID_TOKEN" -> "Invalid token";
+            case "UNAUTHORIZED" -> "Authentication failed";
             default -> "Authentication failed";
         };
     }
