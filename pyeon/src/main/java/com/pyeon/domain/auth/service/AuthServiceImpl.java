@@ -43,8 +43,13 @@ public class AuthServiceImpl implements AuthService {
             } else {
                 return createTokenFromOAuth2User(oauth2User);
             }
-        } catch (Exception e) {
+        } catch (CustomException e) {
+            // CustomException은 그대로 전달
             log.error("토큰 생성 중 오류 발생", e);
+            throw e;
+        } catch (Exception e) {
+            // 다른 예외는 INVALID_TOKEN으로 변환
+            log.error("토큰 생성 중 예상치 못한 오류 발생", e);
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
