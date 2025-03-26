@@ -14,6 +14,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmail(String email);
     
+    boolean existsByNickname(String nickname);
+    
     // isActive 상태와 관계없이 ID로 멤버 찾기
     @Query("SELECT m FROM Member m WHERE m.id = :id")
     Optional<Member> findByIdIncludeInactive(@Param("id") Long id);

@@ -26,8 +26,15 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void updateMember(Long id, MemberUpdateRequest request) {
         Member member = findMemberById(id);
+        
+        // 닉네임 중복 검사
+        String nickname = request.getNickname();
+        if (!member.getNickname().equals(nickname) && memberRepository.existsByNickname(nickname)) {
+            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+        
         member.updateProfile(
-                request.getNickname(),
+                nickname,
                 request.getProfileImageUrl()
         );
     }
