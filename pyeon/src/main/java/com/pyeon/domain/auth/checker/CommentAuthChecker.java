@@ -20,6 +20,12 @@ public class CommentAuthChecker {
             return false;
         }
 
+        // ADMIN은 모든 댓글 수정/삭제 가능
+        if (principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return true;
+        }
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 

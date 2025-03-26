@@ -118,6 +118,9 @@ jobs:
     needs: build-and-push-docker
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://api.pyeondongbu.com
 
     steps:
       - name: Checkout code
