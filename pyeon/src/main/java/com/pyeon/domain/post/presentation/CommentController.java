@@ -42,7 +42,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    @PreAuthorize("hasRole('USER') and @commentAuthChecker.canModify(#id, principal)")
+    @PreAuthorize("hasAnyRole('ADMIN') or (@commentAuthChecker.canModify(#id, principal))")
     public ResponseEntity<Void> deleteComment(
             @PathVariable(name = "postId") Long postId,
             @PathVariable(name = "commentId") @P("id") Long commentId,

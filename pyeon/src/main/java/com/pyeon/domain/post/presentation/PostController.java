@@ -72,7 +72,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("@postAuthChecker.canModify(#id, principal)")
+    @PreAuthorize("hasAnyRole('ADMIN') or (@postAuthChecker.canModify(#id, principal))")
     public ResponseEntity<Void> deletePost(
             @PathVariable(name = "postId") @P("id") Long postId,
             @AuthenticationPrincipal UserPrincipal principal
