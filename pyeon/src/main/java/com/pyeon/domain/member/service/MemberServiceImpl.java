@@ -54,7 +54,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public Member findOrCreateMemberByEmail(String email, Map<String, Object> attributes) {
-        Optional<Member> memberOpt = memberRepository.findByEmailIncludeInactive(email);
+        Optional<Member> memberOpt = memberRepository.findByEmailWithNativeSql(email);
         
         if (memberOpt.isPresent()) {
             return validateAndGetMember(memberOpt.get(), email);

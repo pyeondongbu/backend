@@ -36,4 +36,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      */
     @Query("SELECT m FROM Member m WHERE m.email = :email")
     Optional<Member> findByEmailIncludeInactive(@Param("email") String email);
+    
+    /**
+     * 네이티브 SQL을 사용하여 모든 상태의 회원을 찾는 메서드
+     * @Where 조건을 우회하여 비활성화된 회원도 조회합니다.
+     */
+    @Query(value = "SELECT * FROM member WHERE email = :email", nativeQuery = true)
+    Optional<Member> findByEmailWithNativeSql(@Param("email") String email);
 }
