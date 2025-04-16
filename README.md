@@ -1,12 +1,26 @@
 편동부 백엔드 레포지토리
 
 
-![KakaoTalk_Video_2025-03-04-05-39-57](https://github.com/user-attachments/assets/10c4784d-080e-4d7a-a9c1-ab88a5e09fe8)
+![편동부 영상 ver2 (1)](https://github.com/user-attachments/assets/00fb6af0-3e6c-4b93-af03-316a09c75cfd)
 
-![KakaoTalk_Video_2025-03-04-05-39-57 (1)](https://github.com/user-attachments/assets/66d1bb33-2268-422f-bd90-be3fed193da5)
+## Architecture
 
-![KakaoTalk_Video_2025-03-04-05-39-57 (2)](https://github.com/user-attachments/assets/3d93242d-ae0a-4b6a-95fb-39bc8e893302)
+![image](https://github.com/user-attachments/assets/0beccbfa-780c-4196-b2e8-da766bf37bed)
 
-![KakaoTalk_Video_2025-03-04-05-39-57 (3)](https://github.com/user-attachments/assets/289dc1a8-0f9c-4a0f-9877-66de638c900f)
+## Tech Stack
 
-
+| Category | Technology |
+|----------|------------|
+| Language | Java 17 |
+| Framework | Spring Boot 3.3.7 |
+| ORM | Spring Data JPA |
+| DB | MySQL, Redis |
+| Authentication | OAuth 2.0 |
+| Monitoring | Grafana, Prometheus |
+| Security | Spring Security |
+| Storage | AWS S3 |
+| DB Tools | DBeaver |
+| Deployment | Blue-Green Deployment |
+| External | Docker |
+| CI/CD | Github Action |
+| Others | Notion |
